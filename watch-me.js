@@ -17,14 +17,14 @@ WatchMe.padLeft = function (x, padCharacter, length) {
 WatchMe.update = function () {
   var date = new Date(),
       hour = date.getHours() % 12,
-      minutes = date.getMinutes(),
-      seconds = date.getSeconds(),
-      milliseconds = date.getMilliseconds();
+      minute = date.getMinutes(),
+      second = date.getSeconds(),
+      millisecond = date.getMilliseconds();
 
   // Textual time check.
   WatchMe.display.timeCheck.innerHTML = [ hour,
-      WatchMe.padLeft(minutes, '0', 2),
-      WatchMe.padLeft(seconds, '0', 2) ].join(':');
+      WatchMe.padLeft(minute, '0', 2),
+      WatchMe.padLeft(second, '0', 2) ].join(':');
 
   // Draw background graphics.
   var context = WatchMe.context.watch,
@@ -39,39 +39,36 @@ WatchMe.update = function () {
   context.arc(center.x, center.y, radius - thickness / 2, 0, 2 * Math.PI);
   context.fill();
 
-  // Hours.
-  var hourRadius = 0.24 * radius,
+  var hourRadius = 0.21 * radius,
       hourDistance = radius - hourRadius;
   context.strokeStyle = '#666';
-  for (var i = 0; i < 12; ++i) {
-    var angle = -Math.PI / 2 + i * Math.PI / 6,
-        x = Math.cos(angle) * hourDistance + center.x,
-        y = Math.sin(angle) * hourDistance + center.y;
-    if (i == hour) {
-      context.fillStyle = '#888';
-      context.beginPath();
-      context.arc(x, y, hourRadius, 0, 2 * Math.PI);
-      context.fill();
-    } else {
-      context.fillStyle = '#444';
-      context.beginPath();
-      context.arc(x, y, 0.55 * hourRadius, 0, 2 * Math.PI);
-      context.fill();
-    }
-  }
+  var angle = -Math.PI / 2 + hour * Math.PI / 6,
+      x = Math.cos(angle) * hourDistance + center.x,
+      y = Math.sin(angle) * hourDistance + center.y;
+  context.fillStyle = '#888';
+  context.beginPath();
+  context.arc(x, y, hourRadius, 0, 2 * Math.PI);
+  context.fill();
 
-  // Minutes.
-  var minuteRadius = 0.16 * radius,
+  var minuteRadius = 0.17 * radius,
       minuteDistance = hourDistance - hourRadius - minuteRadius;
-  context.strokeStyle = '#888';
-  for (var i = 0; i < 60; ++i) {
-    var angle = i * Math.PI / 30,
-        x = Math.cos(angle) * minuteDistance + center.x,
-        y = Math.sin(angle) * minuteDistance + center.y;
-    context.beginPath();
-    context.arc(x, y, minuteRadius, 0, 2 * Math.PI);
-    context.stroke();
-  }
+  context.fillStyle = '#666';
+  var angle = -Math.PI / 2 + minute * Math.PI / 30,
+      x = Math.cos(angle) * minuteDistance + center.x,
+      y = Math.sin(angle) * minuteDistance + center.y;
+  context.beginPath();
+  context.arc(x, y, minuteRadius, 0, 2 * Math.PI);
+  context.fill();
+
+  var secondRadius = 0.12 * radius,
+      secondDistance = minuteDistance - minuteRadius - secondRadius;
+  context.fillStyle = '#444';
+  var angle = -Math.PI / 2 + second * Math.PI / 30,
+      x = Math.cos(angle) * secondDistance + center.x,
+      y = Math.sin(angle) * secondDistance + center.y;
+  context.beginPath();
+  context.arc(x, y, secondRadius, 0, 2 * Math.PI);
+  context.fill();
 
   window.requestAnimationFrame(WatchMe.update);
 };
