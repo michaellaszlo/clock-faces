@@ -40,50 +40,26 @@ WatchMe.update = function () {
       minuteDistance = hourDistance - hourRadius - minuteRadius,
       secondRadius = 0.12 * radius,
       secondDistance = minuteDistance - minuteRadius - secondRadius;
-  context.fillStyle = '#efefef';
-  context.strokeStyle = '#ddd';
-  context.beginPath();
-  context.arc(center.x, center.y, radius - thickness / 2, 0, 2 * Math.PI);
-  context.fill();
-  context.fillStyle = '#e8e8e8';
-  context.strokeStyle = '#ccc';
-  context.beginPath();
-  context.arc(center.x, center.y, hourDistance - hourRadius - thickness / 2,
-      0, 2 * Math.PI);
-  context.fill();
-  context.fillStyle = '#e0e0e0';
-  context.strokeStyle = '#bbb';
-  context.beginPath();
-  context.arc(center.x, center.y, minuteDistance - minuteRadius - thickness / 2,
-      0, 2 * Math.PI);
-  context.fill();
 
-  var angle = -Math.PI / 2 + hour * Math.PI / 6;
-  context.strokeStyle = '#888';
-  thickness = 0.14 * hourRadius;
-  context.lineWidth = thickness;
-  context.beginPath();
-  context.arc(center.x, center.y, hourDistance + hourRadius - thickness / 2,
-      angle - Math.PI / 12, angle + Math.PI / 12);
-  context.stroke();
-
-  var angle = -Math.PI / 2 + minute * Math.PI / 30;
-  context.strokeStyle = '#666';
-  thickness = 0.18 * minuteRadius;
-  context.lineWidth = thickness;
-  context.beginPath();
-  context.arc(center.x, center.y, minuteDistance + minuteRadius - thickness / 2,
-      angle - Math.PI / 60, angle + Math.PI / 60);
-  context.stroke();
-
-  var angle = -Math.PI / 2 + second * Math.PI / 30;
-  context.strokeStyle = '#444';
-  thickness = 0.22 * secondRadius;
-  context.lineWidth = thickness;
-  context.beginPath();
-  context.arc(center.x, center.y, secondDistance + secondRadius - thickness / 2,
-      angle - Math.PI / 60, angle + Math.PI / 60);
-  context.stroke();
+  var paintArc = function (value, hertz, handDistance, handRadius,
+        edgeProportion, circleColor, arcColor) {
+    var angle = -Math.PI / 2 + value * 2 * Math.PI / hertz;
+    thickness = edgeProportion * 2 * handRadius;
+    context.lineWidth = thickness;
+    context.beginPath();
+    context.strokeStyle = circleColor;
+    context.arc(center.x, center.y, handDistance + handRadius - thickness / 2,
+        0, 2 * Math.PI);
+    context.stroke();
+    context.beginPath();
+    context.strokeStyle = arcColor;
+    context.arc(center.x, center.y, handDistance + handRadius - thickness / 2,
+        angle - Math.PI / hertz, angle + Math.PI / hertz);
+    context.stroke();
+  };
+  paintArc(hour, 12, hourDistance, hourRadius, 0.105, '#eee', '#888');
+  paintArc(minute, 60, minuteDistance, minuteRadius, 0.135, '#eee', '#666');
+  paintArc(second, 60, secondDistance, secondRadius, 0.165, '#eee', '#444');
 
   window.requestAnimationFrame(WatchMe.update);
 };
