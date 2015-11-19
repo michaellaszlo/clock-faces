@@ -22,9 +22,11 @@ WatchMe.update = function () {
       millisecond = date.getMilliseconds();
 
   // Textual time check.
-  WatchMe.display.timeCheck.innerHTML = [ hour,
-      WatchMe.padLeft(minute, '0', 2),
-      WatchMe.padLeft(second, '0', 2) ].join(':');
+  var hourText = hour + '',
+      minuteText = WatchMe.padLeft(minute, '0', 2),
+      secondText = WatchMe.padLeft(second, '0', 2);
+  WatchMe.display.timeCheck.innerHTML =
+      [ hourText, minuteText, secondText ].join(':');
 
   // Draw background graphics.
   var context = WatchMe.context.watch,
@@ -41,21 +43,24 @@ WatchMe.update = function () {
       secondRadius = 0.12 * radius,
       secondDistance = minuteDistance - minuteRadius - secondRadius;
 
-  var paintArc = function (value, hertz, handDistance, handRadius,
+  var paintArc = function (value, valueText, hertz, handDistance, handRadius,
         edgeProportion, circleColor, arcColor) {
     var angle = -Math.PI / 2 + value * 2 * Math.PI / hertz;
     thickness = edgeProportion * 2 * handRadius;
+    // Background circle.
     context.lineWidth = thickness;
     context.beginPath();
     context.strokeStyle = circleColor;
     context.arc(center.x, center.y, handDistance + handRadius - thickness / 2,
         0, 2 * Math.PI);
     context.stroke();
+    // Foreground arc.
     context.beginPath();
     context.strokeStyle = arcColor;
     context.arc(center.x, center.y, handDistance + handRadius - thickness / 2,
         angle - Math.PI / hertz, angle + Math.PI / hertz);
     context.stroke();
+    // Value position.
     context.beginPath();
     context.lineWidth = 1;
     context.fillStyle = '#e8e8e8';
@@ -64,10 +69,18 @@ WatchMe.update = function () {
     context.arc(x, y, handRadius - thickness / 2, 0, 2 * Math.PI);
     context.lineWidth = 1;
     context.fill();
+    // Value text.
+    context.fillStyle = '#444';
+    context.font = 2 * handRadius - thickness + 'px sans-serif';
+    var width = context.measureText(valueText).width;
+    context.fillText(valueText, x - width / 2, y + handRadius - thickness / 2);
   };
-  paintArc(hour, 12, hourDistance, hourRadius, 0.105, '#f8f8f8', '#888');
-  paintArc(minute, 60, minuteDistance, minuteRadius, 0.135, '#f4f4f4', '#666');
-  paintArc(second, 60, secondDistance, secondRadius, 0.165, '#f4f4f4', '#444');
+  paintArc(hour, hourText, 12, hourDistance, hourRadius,
+      0.105, '#f4f4f4', '#888');
+  paintArc(minute, minuteText, 60, minuteDistance, minuteRadius,
+      0.135, '#f4f4f4', '#666');
+  paintArc(second, secondText, 60, secondDistance, secondRadius,
+      0.165, '#f4f4f4', '#444');
 
   window.requestAnimationFrame(WatchMe.update);
 };
