@@ -16,13 +16,13 @@ WatchMe.padLeft = function (x, padCharacter, length) {
 
 WatchMe.update = function () {
   var date = new Date(),
-      hour = date.getHours(),
+      hour = date.getHours() % 12,
       minutes = date.getMinutes(),
       seconds = date.getSeconds(),
       milliseconds = date.getMilliseconds();
 
   // Textual time check.
-  WatchMe.display.timeCheck.innerHTML = [ hour % 12,
+  WatchMe.display.timeCheck.innerHTML = [ hour,
       WatchMe.padLeft(minutes, '0', 2),
       WatchMe.padLeft(seconds, '0', 2) ].join(':');
 
@@ -44,12 +44,20 @@ WatchMe.update = function () {
       hourDistance = radius - hourRadius;
   context.strokeStyle = '#666';
   for (var i = 0; i < 12; ++i) {
-    var angle = i * Math.PI / 6,
+    var angle = -Math.PI / 2 + i * Math.PI / 6,
         x = Math.cos(angle) * hourDistance + center.x,
         y = Math.sin(angle) * hourDistance + center.y;
-    context.beginPath();
-    context.arc(x, y, hourRadius, 0, 2 * Math.PI);
-    context.stroke();
+    if (i == hour) {
+      context.fillStyle = '#888';
+      context.beginPath();
+      context.arc(x, y, hourRadius, 0, 2 * Math.PI);
+      context.fill();
+    } else {
+      context.fillStyle = '#444';
+      context.beginPath();
+      context.arc(x, y, 0.55 * hourRadius, 0, 2 * Math.PI);
+      context.fill();
+    }
   }
 
   // Minutes.
