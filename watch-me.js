@@ -31,16 +31,33 @@ WatchMe.update = function () {
       radius = WatchMe.radius,
       center = { x: radius, y: radius };
       thickness = 1;
+  context.clearRect(0, 0, 2 * radius, 2 * radius);
   context.lineWidth = thickness;
+
+  var hourRadius = 0.21 * radius,
+      hourDistance = radius - hourRadius,
+      minuteRadius = 0.16 * radius,
+      minuteDistance = hourDistance - hourRadius - minuteRadius,
+      secondRadius = 0.10 * radius,
+      secondDistance = minuteDistance - minuteRadius - secondRadius;
   context.fillStyle = '#eee';
   context.strokeStyle = '#ddd';
-  context.clearRect(0, 0, 2 * radius, 2 * radius);
   context.beginPath();
   context.arc(center.x, center.y, radius - thickness / 2, 0, 2 * Math.PI);
   context.fill();
+  context.fillStyle = '#ddd';
+  context.strokeStyle = '#ccc';
+  context.beginPath();
+  context.arc(center.x, center.y, hourDistance - hourRadius - thickness / 2,
+      0, 2 * Math.PI);
+  context.fill();
+  context.fillStyle = '#ccc';
+  context.strokeStyle = '#bbb';
+  context.beginPath();
+  context.arc(center.x, center.y, minuteDistance - minuteRadius - thickness / 2,
+      0, 2 * Math.PI);
+  context.fill();
 
-  var hourRadius = 0.21 * radius,
-      hourDistance = radius - hourRadius;
   context.strokeStyle = '#666';
   var angle = -Math.PI / 2 + hour * Math.PI / 6,
       x = Math.cos(angle) * hourDistance + center.x,
@@ -50,8 +67,6 @@ WatchMe.update = function () {
   context.arc(x, y, hourRadius, 0, 2 * Math.PI);
   context.fill();
 
-  var minuteRadius = 0.17 * radius,
-      minuteDistance = hourDistance - hourRadius - minuteRadius;
   context.fillStyle = '#666';
   var angle = -Math.PI / 2 + minute * Math.PI / 30,
       x = Math.cos(angle) * minuteDistance + center.x,
@@ -60,8 +75,6 @@ WatchMe.update = function () {
   context.arc(x, y, minuteRadius, 0, 2 * Math.PI);
   context.fill();
 
-  var secondRadius = 0.12 * radius,
-      secondDistance = minuteDistance - minuteRadius - secondRadius;
   context.fillStyle = '#444';
   var angle = -Math.PI / 2 + second * Math.PI / 30,
       x = Math.cos(angle) * secondDistance + center.x,
