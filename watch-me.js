@@ -29,7 +29,7 @@ WatchMe.update = function () {
   // Draw background graphics.
   var context = WatchMe.context.watch,
       radius = WatchMe.radius,
-      center = { x: radius, y: radius },
+      center = { x: radius, y: radius };
       thickness = 1;
   context.lineWidth = thickness;
   context.fillStyle = '#eee';
@@ -38,7 +38,32 @@ WatchMe.update = function () {
   context.beginPath();
   context.arc(center.x, center.y, radius - thickness / 2, 0, 2 * Math.PI);
   context.fill();
-  console.log(context.imageSmoothingEnabled);
+
+  // Hours.
+  var hourRadius = 0.24 * radius,
+      hourDistance = radius - hourRadius;
+  context.strokeStyle = '#666';
+  for (var i = 0; i < 12; ++i) {
+    var angle = i * Math.PI / 6,
+        x = Math.cos(angle) * hourDistance + center.x,
+        y = Math.sin(angle) * hourDistance + center.y;
+    context.beginPath();
+    context.arc(x, y, hourRadius, 0, 2 * Math.PI);
+    context.stroke();
+  }
+
+  // Minutes.
+  var minuteRadius = 0.16 * radius,
+      minuteDistance = hourDistance - hourRadius - minuteRadius;
+  context.strokeStyle = '#888';
+  for (var i = 0; i < 60; ++i) {
+    var angle = i * Math.PI / 30,
+        x = Math.cos(angle) * minuteDistance + center.x,
+        y = Math.sin(angle) * minuteDistance + center.y;
+    context.beginPath();
+    context.arc(x, y, minuteRadius, 0, 2 * Math.PI);
+    context.stroke();
+  }
 
   window.requestAnimationFrame(WatchMe.update);
 };
