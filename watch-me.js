@@ -40,18 +40,18 @@ WatchMe.update = function () {
       minuteDistance = hourDistance - hourRadius - minuteRadius,
       secondRadius = 0.12 * radius,
       secondDistance = minuteDistance - minuteRadius - secondRadius;
-  context.fillStyle = '#eee';
+  context.fillStyle = '#efefef';
   context.strokeStyle = '#ddd';
   context.beginPath();
   context.arc(center.x, center.y, radius - thickness / 2, 0, 2 * Math.PI);
   context.fill();
-  context.fillStyle = '#ddd';
+  context.fillStyle = '#e8e8e8';
   context.strokeStyle = '#ccc';
   context.beginPath();
   context.arc(center.x, center.y, hourDistance - hourRadius - thickness / 2,
       0, 2 * Math.PI);
   context.fill();
-  context.fillStyle = '#ccc';
+  context.fillStyle = '#e0e0e0';
   context.strokeStyle = '#bbb';
   context.beginPath();
   context.arc(center.x, center.y, minuteDistance - minuteRadius - thickness / 2,
@@ -60,25 +60,28 @@ WatchMe.update = function () {
 
   var angle = -Math.PI / 2 + hour * Math.PI / 6;
   context.strokeStyle = '#888';
-  context.lineWidth = 2 * hourRadius;
+  thickness = 0.14 * hourRadius;
+  context.lineWidth = thickness;
   context.beginPath();
-  context.arc(center.x, center.y, hourDistance,
+  context.arc(center.x, center.y, hourDistance + hourRadius - thickness / 2,
       angle - Math.PI / 12, angle + Math.PI / 12);
   context.stroke();
 
   var angle = -Math.PI / 2 + minute * Math.PI / 30;
   context.strokeStyle = '#666';
-  context.lineWidth = 2 * minuteRadius;
+  thickness = 0.18 * minuteRadius;
+  context.lineWidth = thickness;
   context.beginPath();
-  context.arc(center.x, center.y, minuteDistance,
+  context.arc(center.x, center.y, minuteDistance + minuteRadius - thickness / 2,
       angle - Math.PI / 60, angle + Math.PI / 60);
   context.stroke();
 
   var angle = -Math.PI / 2 + second * Math.PI / 30;
   context.strokeStyle = '#444';
-  context.lineWidth = 2 * secondRadius;
+  thickness = 0.22 * secondRadius;
+  context.lineWidth = thickness;
   context.beginPath();
-  context.arc(center.x, center.y, secondDistance,
+  context.arc(center.x, center.y, secondDistance + secondRadius - thickness / 2,
       angle - Math.PI / 60, angle + Math.PI / 60);
   context.stroke();
 
