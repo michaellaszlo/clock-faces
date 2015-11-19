@@ -34,11 +34,11 @@ WatchMe.update = function () {
   context.clearRect(0, 0, 2 * radius, 2 * radius);
   context.lineWidth = thickness;
 
-  var hourRadius = 0.21 * radius,
+  var hourRadius = 0.20 * radius,
       hourDistance = radius - hourRadius,
       minuteRadius = 0.16 * radius,
       minuteDistance = hourDistance - hourRadius - minuteRadius,
-      secondRadius = 0.10 * radius,
+      secondRadius = 0.12 * radius,
       secondDistance = minuteDistance - minuteRadius - secondRadius;
   context.fillStyle = '#eee';
   context.strokeStyle = '#ddd';
@@ -58,30 +58,29 @@ WatchMe.update = function () {
       0, 2 * Math.PI);
   context.fill();
 
+  var angle = -Math.PI / 2 + hour * Math.PI / 6;
+  context.strokeStyle = '#888';
+  context.lineWidth = 2 * hourRadius;
+  context.beginPath();
+  context.arc(center.x, center.y, hourDistance,
+      angle - Math.PI / 12, angle + Math.PI / 12);
+  context.stroke();
+
+  var angle = -Math.PI / 2 + minute * Math.PI / 30;
   context.strokeStyle = '#666';
-  var angle = -Math.PI / 2 + hour * Math.PI / 6,
-      x = Math.cos(angle) * hourDistance + center.x,
-      y = Math.sin(angle) * hourDistance + center.y;
-  context.fillStyle = '#888';
+  context.lineWidth = 2 * minuteRadius;
   context.beginPath();
-  context.arc(x, y, hourRadius, 0, 2 * Math.PI);
-  context.fill();
+  context.arc(center.x, center.y, minuteDistance,
+      angle - Math.PI / 60, angle + Math.PI / 60);
+  context.stroke();
 
-  context.fillStyle = '#666';
-  var angle = -Math.PI / 2 + minute * Math.PI / 30,
-      x = Math.cos(angle) * minuteDistance + center.x,
-      y = Math.sin(angle) * minuteDistance + center.y;
+  var angle = -Math.PI / 2 + second * Math.PI / 30;
+  context.strokeStyle = '#444';
+  context.lineWidth = 2 * secondRadius;
   context.beginPath();
-  context.arc(x, y, minuteRadius, 0, 2 * Math.PI);
-  context.fill();
-
-  context.fillStyle = '#444';
-  var angle = -Math.PI / 2 + second * Math.PI / 30,
-      x = Math.cos(angle) * secondDistance + center.x,
-      y = Math.sin(angle) * secondDistance + center.y;
-  context.beginPath();
-  context.arc(x, y, secondRadius, 0, 2 * Math.PI);
-  context.fill();
+  context.arc(center.x, center.y, secondDistance,
+      angle - Math.PI / 60, angle + Math.PI / 60);
+  context.stroke();
 
   window.requestAnimationFrame(WatchMe.update);
 };
