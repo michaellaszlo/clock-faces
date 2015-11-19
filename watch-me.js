@@ -56,10 +56,18 @@ WatchMe.update = function () {
     context.arc(center.x, center.y, handDistance + handRadius - thickness / 2,
         angle - Math.PI / hertz, angle + Math.PI / hertz);
     context.stroke();
+    context.beginPath();
+    context.lineWidth = 1;
+    context.fillStyle = '#e8e8e8';
+    var x = center.x + Math.cos(angle) * (handDistance - thickness / 2),
+        y = center.y + Math.sin(angle) * (handDistance - thickness / 2);
+    context.arc(x, y, handRadius - thickness / 2, 0, 2 * Math.PI);
+    context.lineWidth = 1;
+    context.fill();
   };
-  paintArc(hour, 12, hourDistance, hourRadius, 0.105, '#eee', '#888');
-  paintArc(minute, 60, minuteDistance, minuteRadius, 0.135, '#eee', '#666');
-  paintArc(second, 60, secondDistance, secondRadius, 0.165, '#eee', '#444');
+  paintArc(hour, 12, hourDistance, hourRadius, 0.105, '#f8f8f8', '#888');
+  paintArc(minute, 60, minuteDistance, minuteRadius, 0.135, '#f4f4f4', '#666');
+  paintArc(second, 60, secondDistance, secondRadius, 0.165, '#f4f4f4', '#444');
 
   window.requestAnimationFrame(WatchMe.update);
 };
