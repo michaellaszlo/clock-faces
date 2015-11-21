@@ -105,8 +105,8 @@ WatchMe.update = function () {
   var hourText = (hour == 0 ? 12: hour) + '',
       minuteText = WatchMe.padLeft(minute, '0', 2),
       secondText = WatchMe.padLeft(second, '0', 2);
-  WatchMe.display.timeCheck.innerHTML =
-      [ hourText, minuteText, secondText ].join(':');
+  //WatchMe.display.timeCheck.innerHTML =
+  //    [ hourText, minuteText, secondText ].join(':');
 
   // Draw background graphics.
   var context = WatchMe.context.watch,
@@ -144,14 +144,16 @@ WatchMe.update = function () {
     var x = center.x + Math.cos(angle) * (handDistance - thickness / 2),
         y = center.y + Math.sin(angle) * (handDistance - thickness / 2);
     // Value text.
-    var fontSize = Math.round(2 * handRadius - thickness),
+    var fontSize = Math.round(1.2 * handRadius),
         font = fontSize + 'px sans-serif';
     context.font = font;
     var m = WatchMe.measureText(valueText, font, fontSize);
+    /*
     context.beginPath();
     context.fillStyle = '#e8e8e8';
     context.arc(x, y, m.radius, 0, 2 * Math.PI);
     context.fill();
+    */
     context.fillStyle = '#444';
     context.fillText(valueText,
         x - m.fillCenter.x,
