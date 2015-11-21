@@ -1,6 +1,17 @@
 WatchMe = {
   initial: {
     diameter: 300
+  },
+  textMaker: {
+    hour: function (hour) {
+      return (hour == 0 ? 12: hour) + '';
+    },
+    minute: function (minute) {
+      return WatchMe.padLeft(minute, '0', 2);
+    },
+    second: function (second) {
+      return WatchMe.padLeft(second, '0', 2);
+    }
   }
 };
 
@@ -101,27 +112,23 @@ WatchMe.update = function () {
       second = date.getSeconds(),
       millisecond = date.getMilliseconds();
 
-  // Textual time check.
-  var hourText = (hour == 0 ? 12: hour) + '',
-      minuteText = WatchMe.padLeft(minute, '0', 2),
-      secondText = WatchMe.padLeft(second, '0', 2);
-  //WatchMe.display.timeCheck.innerHTML =
-  //    [ hourText, minuteText, secondText ].join(':');
-
   // Draw background graphics.
   var context = WatchMe.context.watch,
       radius = WatchMe.radius,
       center = { x: radius, y: radius };
-      thickness = 1;
   context.clearRect(0, 0, 2 * radius, 2 * radius);
-  context.lineWidth = thickness;
+  context.beginPath();
+  context.fillStyle = '#aaa';
+  context.arc(center.x, center.y, 0.015 * radius, 0, 2 * Math.PI);
+  context.fill();
 
-  var hourRadius = 0.21 * radius,
+  var gap = 0.01 * radius,
+      hourRadius = 0.21 * radius,
       hourDistance = radius - hourRadius,
-      minuteRadius = 0.19 * radius,
-      minuteDistance = hourDistance - hourRadius - minuteRadius,
-      secondRadius = 0.10 * radius,
-      secondDistance = minuteDistance - minuteRadius - secondRadius;
+      minuteRadius = 0.18 * radius,
+      minuteDistance = hourDistance - gap - hourRadius - minuteRadius,
+      secondRadius = 0.085 * radius,
+      secondDistance = minuteDistance - gap - minuteRadius - secondRadius;
   /*
   var secondRadius = 0.20 * radius,
       secondDistance = radius - secondRadius,
@@ -131,49 +138,39 @@ WatchMe.update = function () {
       hourDistance = 0;
   */
 
-  var paintArc = function (value, valueText, hertz, handDistance, handRadius,
-        edgeProportion, circleColor, arcColor) {
-    var angle = -Math.PI / 2 + value * 2 * Math.PI / hertz;
-    thickness = edgeProportion * 2 * handRadius;
-    // Background circle.
-    context.lineWidth = thickness;
-    context.beginPath();
-    context.strokeStyle = circleColor;
-    context.arc(center.x, center.y, handDistance + handRadius - thickness / 2,
-        0, 2 * Math.PI);
-    context.stroke();
-    // Foreground arc.
-    context.beginPath();
-    context.strokeStyle = arcColor;
-    context.arc(center.x, center.y, handDistance + handRadius - thickness / 2,
-        angle - Math.PI / hertz, angle + Math.PI / hertz);
-    context.stroke();
+  var paintArc = function (value, textMaker, hertz, distance, radius,
+        color, discColor) {
+    var angle = -Math.PI / 2 + value * 2 * Math.PI / hertz,
+        text = textMaker(value);
     // Value position.
-    var distance = Math.max(0, handDistance - thickness / 2),
-        x = center.x + Math.cos(angle) * distance,
+    var x = center.x + Math.cos(angle) * distance,
         y = center.y + Math.sin(angle) * distance;
     // Value text.
-    var fontSize = Math.round(1.2 * handRadius),
+    var fontSize = 1.33 * radius,
         font = fontSize + 'px sans-serif';
     context.font = font;
-    var m = WatchMe.measureText(valueText, font, fontSize);
-    /*
-    context.beginPath();
-    context.fillStyle = '#e8e8e8';
-    context.arc(x, y, m.radius, 0, 2 * Math.PI);
-    context.fill();
-    */
-    context.fillStyle = arcColor;
-    context.fillText(valueText,
-        x - m.fillCenter.x,
-        y - m.fillCenter.y);
+    var m = WatchMe.measureText(text, font, fontSize);
+    if (discColor) {
+      context.fillStyle = discColor;
+      context.beginPath();
+      context.arc(x, y, radius, 0, 2 * Math.PI);
+      context.fill();
+    }
+    context.fillStyle = color;
+    context.fillText(text, x - m.fillCenter.x, y - m.fillCenter.y);
   };
-  paintArc(hour, hourText, 12, hourDistance, hourRadius,
-      0.10, '#f4f4f4', '#666');
-  paintArc(minute, minuteText, 60, minuteDistance, minuteRadius,
-      0.12, '#f4f4f4', '#666');
-  paintArc(second, secondText, 60, secondDistance, secondRadius,
-      0.16, '#f4f4f4', '#666');
+  for (var h = 0; h < 12; ++h) {
+    if (h == hour) {
+      paintArc(h, WatchMe.textMaker.hour, 12,
+          hourDistance, hourRadius, '#fff', '#444');
+    } else {
+      paintArc(h, WatchMe.textMaker.hour, 12, hourDistance, hourRadius, '#aaa');
+    }
+  }
+  paintArc(minute, WatchMe.textMaker.minute, 60,
+      minuteDistance, minuteRadius, '#fff', '#666');
+  paintArc(second, WatchMe.textMaker.second, 60,
+      secondDistance, secondRadius, '#fff', '#888');
 
   if (WatchMe.stopped) {
     return;
