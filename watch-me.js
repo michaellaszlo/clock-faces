@@ -116,12 +116,20 @@ WatchMe.update = function () {
   context.clearRect(0, 0, 2 * radius, 2 * radius);
   context.lineWidth = thickness;
 
-  var hourRadius = 0.20 * radius,
+  var hourRadius = 0.21 * radius,
       hourDistance = radius - hourRadius,
-      minuteRadius = 0.16 * radius,
+      minuteRadius = 0.19 * radius,
       minuteDistance = hourDistance - hourRadius - minuteRadius,
-      secondRadius = 0.12 * radius,
+      secondRadius = 0.10 * radius,
       secondDistance = minuteDistance - minuteRadius - secondRadius;
+  /*
+  var secondRadius = 0.20 * radius,
+      secondDistance = radius - secondRadius,
+      minuteRadius = 0.20 * radius,
+      minuteDistance = secondDistance - secondRadius - minuteRadius,
+      hourRadius = 0.20 * radius,
+      hourDistance = 0;
+  */
 
   var paintArc = function (value, valueText, hertz, handDistance, handRadius,
         edgeProportion, circleColor, arcColor) {
@@ -141,8 +149,9 @@ WatchMe.update = function () {
         angle - Math.PI / hertz, angle + Math.PI / hertz);
     context.stroke();
     // Value position.
-    var x = center.x + Math.cos(angle) * (handDistance - thickness / 2),
-        y = center.y + Math.sin(angle) * (handDistance - thickness / 2);
+    var distance = Math.max(0, handDistance - thickness / 2),
+        x = center.x + Math.cos(angle) * distance,
+        y = center.y + Math.sin(angle) * distance;
     // Value text.
     var fontSize = Math.round(1.2 * handRadius),
         font = fontSize + 'px sans-serif';
@@ -154,17 +163,17 @@ WatchMe.update = function () {
     context.arc(x, y, m.radius, 0, 2 * Math.PI);
     context.fill();
     */
-    context.fillStyle = '#444';
+    context.fillStyle = arcColor;
     context.fillText(valueText,
         x - m.fillCenter.x,
         y - m.fillCenter.y);
   };
   paintArc(hour, hourText, 12, hourDistance, hourRadius,
-      0.105, '#f4f4f4', '#888');
+      0.10, '#f4f4f4', '#666');
   paintArc(minute, minuteText, 60, minuteDistance, minuteRadius,
-      0.135, '#f4f4f4', '#666');
+      0.12, '#f4f4f4', '#666');
   paintArc(second, secondText, 60, secondDistance, secondRadius,
-      0.165, '#f4f4f4', '#444');
+      0.16, '#f4f4f4', '#666');
 
   if (WatchMe.stopped) {
     return;
