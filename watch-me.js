@@ -36,11 +36,12 @@ WatchMe.measureText = function (text, font, fontSize) {
     context.font = font;
   }
   context.clearRect(0, 0, canvas.width, canvas.height);
-  var height = canvas.height;
-  context.fillText(text, 0, height / 2);
+  var height = canvas.height,
+      xFill = 0,
+      yFill = height / 2;
+  context.fillText(text, xFill, yFill);
   var data = context.getImageData(0, 0, width, height).data,
       xMin, xMax, yMin, yMax;
-  console.log(width, height, data.length);
   for (var x = 0; x < width; ++x) {
     for (var y = 0; y < height; ++y) {
       var i = 4 * (y * width + x);
@@ -73,7 +74,6 @@ WatchMe.measureText = function (text, font, fontSize) {
     }
   }
   var radius = Math.ceil(Math.sqrt(radiusSquared));
-  console.log(xMin, yMin, xMax, yMax, text, font, radius);
   context.fillStyle = '#ccc';
   context.beginPath();
   context.arc(x0, y0, radius, 0, 2 * Math.PI);
@@ -83,10 +83,16 @@ WatchMe.measureText = function (text, font, fontSize) {
   if (cache[font] === undefined) {
     cache[font] = {};
   }
-  cache[font][text] = {
-    xMin: xMax, xMax: xMax, yMin: yMin, yMax: yMax
+  var measurement = cache[font][text] = {
+    xMin: xMin, xMax: xMax, yMin: yMin, yMax: yMax,
+    radius: radius,
+    centerFromFill: {
+      x: x0 - xFill,
+      y: y0 - yFill
+    }
   };
-  return cache[font][text];
+  console.log(measurement);
+  return measurement;
 };
 
 WatchMe.update = function () {
