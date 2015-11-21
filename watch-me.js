@@ -86,12 +86,11 @@ WatchMe.measureText = function (text, font, fontSize) {
   var measurement = cache[font][text] = {
     xMin: xMin, xMax: xMax, yMin: yMin, yMax: yMax,
     radius: radius,
-    centerFromFill: {
+    fillCenter: {
       x: x0 - xFill,
       y: y0 - yFill
     }
   };
-  console.log(measurement);
   return measurement;
 };
 
@@ -142,22 +141,21 @@ WatchMe.update = function () {
         angle - Math.PI / hertz, angle + Math.PI / hertz);
     context.stroke();
     // Value position.
-    context.beginPath();
-    context.lineWidth = 1;
-    context.fillStyle = '#e8e8e8';
     var x = center.x + Math.cos(angle) * (handDistance - thickness / 2),
         y = center.y + Math.sin(angle) * (handDistance - thickness / 2);
-    context.arc(x, y, handRadius - thickness / 2, 0, 2 * Math.PI);
-    context.lineWidth = 1;
-    context.fill();
     // Value text.
-    context.fillStyle = '#444';
     var fontSize = Math.round(2 * handRadius - thickness),
         font = fontSize + 'px sans-serif';
     context.font = font;
-    var width = context.measureText(valueText).width;
-    WatchMe.measureText(valueText, font, fontSize);
-    context.fillText(valueText, x - width / 2, y + handRadius - thickness / 2);
+    var m = WatchMe.measureText(valueText, font, fontSize);
+    context.beginPath();
+    context.fillStyle = '#e8e8e8';
+    context.arc(x, y, m.radius, 0, 2 * Math.PI);
+    context.fill();
+    context.fillStyle = '#444';
+    context.fillText(valueText,
+        x - m.fillCenter.x,
+        y - m.fillCenter.y);
   };
   paintArc(hour, hourText, 12, hourDistance, hourRadius,
       0.105, '#f4f4f4', '#888');
@@ -190,10 +188,6 @@ WatchMe.load = function () {
     watch: canvas.getContext('2d'),
     measure: WatchMe.canvas.measure.getContext('2d')
   };
-  var measureCanvas = WatchMe.canvas.measure;
-  measureCanvas.width = measureCanvas.height = 10;
-  measureCanvas.style.border = '1px dotted #ccc';
-  document.getElementById('wrapper').appendChild(measureCanvas);
   document.getElementById('stopButton').onmousedown = function () {
     WatchMe.stopped = true;
   };
