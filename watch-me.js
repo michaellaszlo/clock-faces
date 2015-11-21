@@ -43,12 +43,8 @@ WatchMe.measureText = function (text, font, fontSize) {
   console.log(width, height, data.length);
   for (var x = 0; x < width; ++x) {
     for (var y = 0; y < height; ++y) {
-      var i = 4 * (y * width + x),
-          r = data[i],
-          g = data[i + 1],
-          b = data[i + 2],
-          a = data[i + 3];
-      if (a == 0) {
+      var i = 4 * (y * width + x);
+      if (data[i + 3] == 0) {
         continue;
       }
       if (xMin === undefined) {
@@ -62,9 +58,26 @@ WatchMe.measureText = function (text, font, fontSize) {
       }
     }
   }
-  console.log(xMin, yMin, xMax, yMax, text, font);
-  context.fillStyle = '#bbb';
-  context.fillRect(xMin, yMin, xMax - xMin + 1, yMax - yMin + 1);
+  var x0 = (xMin + xMax) / 2,
+      y0 = (yMin + yMax) / 2,
+      radiusSquared = 0;
+  for (var x = xMin; x <= xMax; ++x) {
+    for (var y = yMin; y <= yMax; ++y) {
+      var i = 4 * (y * width + x);
+      if (data[i + 3] == 0) {
+        continue;
+      }
+      var dx = Math.abs(x - x0) + 1,
+          dy = Math.abs(y - y0) + 1;
+      radiusSquared = Math.max(radiusSquared, dx * dx + dy * dy);
+    }
+  }
+  var radius = Math.ceil(Math.sqrt(radiusSquared));
+  console.log(xMin, yMin, xMax, yMax, text, font, radius);
+  context.fillStyle = '#ccc';
+  context.beginPath();
+  context.arc(x0, y0, radius, 0, 2 * Math.PI);
+  context.fill();
   context.fillStyle = '#000';
   context.fillText(text, 0, height / 2);
   if (cache[font] === undefined) {
@@ -142,8 +155,6 @@ WatchMe.update = function () {
   };
   paintArc(hour, hourText, 12, hourDistance, hourRadius,
       0.105, '#f4f4f4', '#888');
-  WatchMe.stopped = true;
-  return;
   paintArc(minute, minuteText, 60, minuteDistance, minuteRadius,
       0.135, '#f4f4f4', '#666');
   paintArc(second, secondText, 60, secondDistance, secondRadius,
