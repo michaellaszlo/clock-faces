@@ -105,15 +105,11 @@ WatchMe.measureText = function (text, font, fontSize) {
   return measurement;
 };
 
-WatchMe.update = function () {
-  var date = new Date(),
-      hour = date.getHours() % 12,
-      minute = date.getMinutes(),
-      second = date.getSeconds(),
-      millisecond = date.getMilliseconds();
+WatchMe.bubbleClock = {};
 
+WatchMe.bubbleClock.update = function (hour, minute, second) {
   // Draw background graphics.
-  var context = WatchMe.context.watch,
+  var context = WatchMe.bubbleClock.context,
       radius = WatchMe.radius,
       center = { x: radius, y: radius };
   context.clearRect(0, 0, 2 * radius, 2 * radius);
@@ -129,14 +125,6 @@ WatchMe.update = function () {
       minuteDistance = hourDistance - gap - hourRadius - minuteRadius,
       secondRadius = 0.085 * radius,
       secondDistance = minuteDistance - gap - minuteRadius - secondRadius;
-  /*
-  var secondRadius = 0.20 * radius,
-      secondDistance = radius - secondRadius,
-      minuteRadius = 0.20 * radius,
-      minuteDistance = secondDistance - secondRadius - minuteRadius,
-      hourRadius = 0.20 * radius,
-      hourDistance = 0;
-  */
 
   var paintArc = function (value, textMaker, hertz, distance, radius,
         color, discColor) {
@@ -171,6 +159,15 @@ WatchMe.update = function () {
       minuteDistance, minuteRadius, '#fff', '#666');
   paintArc(second, WatchMe.textMaker.second, 60,
       secondDistance, secondRadius, '#fff', '#888');
+};
+
+WatchMe.update = function () {
+  var date = new Date(),
+      hour = date.getHours() % 12,
+      minute = date.getMinutes(),
+      second = date.getSeconds();
+
+  WatchMe.bubbleClock.update(hour, minute, second);
 
   if (WatchMe.stopped) {
     return;
@@ -193,9 +190,10 @@ WatchMe.load = function () {
   canvas.width = diameter;
   canvas.height = diameter;
   WatchMe.context = {
-    watch: canvas.getContext('2d'),
     measure: WatchMe.canvas.measure.getContext('2d')
   };
+  WatchMe.bubbleClock.context = canvas.getContext('2d');
+
   document.getElementById('stopButton').onmousedown = function () {
     WatchMe.stopped = true;
   };
