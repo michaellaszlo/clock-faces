@@ -1,4 +1,4 @@
-WatchMe = {
+Clock = {
   initial: {
     diameter: 300
   },
@@ -7,15 +7,15 @@ WatchMe = {
       return (hour == 0 ? 12: hour) + '';
     },
     minute: function (minute) {
-      return WatchMe.padLeft(minute, '0', 2);
+      return Clock.padLeft(minute, '0', 2);
     },
     second: function (second) {
-      return WatchMe.padLeft(second, '0', 2);
+      return Clock.padLeft(second, '0', 2);
     }
   }
 };
 
-WatchMe.padLeft = function (x, padCharacter, length) {
+Clock.padLeft = function (x, padCharacter, length) {
   var s = '' + x,
       parts = [];
   for (var i = s.length; i < length; ++i) {
@@ -25,15 +25,17 @@ WatchMe.padLeft = function (x, padCharacter, length) {
   return parts.join('');
 };
 
-WatchMe.cachedTextMeasurements = {};
+Clock.measure = {};
 
-WatchMe.measureText = function (text, font, fontSize) {
-  var cache = WatchMe.cachedTextMeasurements;
+Clock.measure.cache = {};
+
+Clock.measure.text = function (text, font, fontSize) {
+  var cache = Clock.measure.cache;
   if (cache[font] !== undefined && cache[font][text] !== undefined) {
     return cache[font][text];
   }
-  var canvas = WatchMe.canvas.measure,
-      context = WatchMe.context.measure;
+  var canvas = Clock.measure.canvas,
+      context = Clock.measure.context;
   if (context.font != font) {
     context.font = font;
   }
@@ -105,12 +107,12 @@ WatchMe.measureText = function (text, font, fontSize) {
   return measurement;
 };
 
-WatchMe.bubbleClock = {};
+Clock.bubbleClock = {};
 
-WatchMe.bubbleClock.update = function (hour, minute, second) {
+Clock.bubbleClock.update = function (hour, minute, second) {
   // Draw background graphics.
-  var context = WatchMe.bubbleClock.context,
-      radius = WatchMe.radius,
+  var context = Clock.bubbleClock.context,
+      radius = Clock.radius,
       center = { x: radius, y: radius };
   context.clearRect(0, 0, 2 * radius, 2 * radius);
   context.beginPath();
@@ -137,7 +139,7 @@ WatchMe.bubbleClock.update = function (hour, minute, second) {
     var fontSize = 1.33 * radius,
         font = fontSize + 'px sans-serif';
     context.font = font;
-    var m = WatchMe.measureText(text, font, fontSize);
+    var m = Clock.measure.text(text, font, fontSize);
     if (discColor) {
       context.fillStyle = discColor;
       context.beginPath();
@@ -149,55 +151,54 @@ WatchMe.bubbleClock.update = function (hour, minute, second) {
   };
   for (var h = 0; h < 12; ++h) {
     if (h == hour) {
-      paintArc(h, WatchMe.textMaker.hour, 12,
+      paintArc(h, Clock.textMaker.hour, 12,
           hourDistance, hourRadius, '#fff', '#444');
     } else {
-      paintArc(h, WatchMe.textMaker.hour, 12, hourDistance, hourRadius, '#aaa');
+      paintArc(h, Clock.textMaker.hour, 12, hourDistance, hourRadius, '#aaa');
     }
   }
-  paintArc(minute, WatchMe.textMaker.minute, 60,
+  paintArc(minute, Clock.textMaker.minute, 60,
       minuteDistance, minuteRadius, '#fff', '#666');
-  paintArc(second, WatchMe.textMaker.second, 60,
+  paintArc(second, Clock.textMaker.second, 60,
       secondDistance, secondRadius, '#fff', '#888');
 };
 
-WatchMe.update = function () {
+Clock.update = function () {
   var date = new Date(),
       hour = date.getHours() % 12,
       minute = date.getMinutes(),
       second = date.getSeconds();
 
-  WatchMe.bubbleClock.update(hour, minute, second);
+  Clock.bubbleClock.update(hour, minute, second);
 
-  if (WatchMe.stopped) {
+  if (Clock.stopped) {
     return;
   }
-  window.requestAnimationFrame(WatchMe.update);
+  window.requestAnimationFrame(Clock.update);
 };
 
-WatchMe.load = function () {
-  WatchMe.display = {
-    timeCheck: document.getElementById('timeCheck')
-  };
-  WatchMe.canvas = {
-    watch: document.createElement('canvas'),
-    measure: document.createElement('canvas')
-  };
-  var canvas = WatchMe.canvas.watch,
-      diameter = WatchMe.diameter = WatchMe.initial.diameter,
-      radius = WatchMe.radius = diameter / 2;
-  document.getElementById('watchContainer').appendChild(canvas);
-  canvas.width = diameter;
-  canvas.height = diameter;
-  WatchMe.context = {
-    measure: WatchMe.canvas.measure.getContext('2d')
-  };
-  WatchMe.bubbleClock.context = canvas.getContext('2d');
+Clock.load = function () {
+  Clock.measure.canvas = document.createElement('canvas');
+  Clock.measure.context = Clock.measure.canvas.getContext('2d');
+
+  var diameter = Clock.diameter = Clock.initial.diameter;
+  Clock.radius = diameter / 2;
+
+  var container = document.getElementById('watchContainer');
+
+  [ Clock.bubbleClock ].forEach(function (clock) {
+    var canvas = document.createElement('canvas');
+    canvas.width = diameter;
+    canvas.height = diameter;
+    clock.canvas = canvas;
+    clock.context = canvas.getContext('2d');
+    container.appendChild(canvas);
+  });
 
   document.getElementById('stopButton').onmousedown = function () {
-    WatchMe.stopped = true;
+    Clock.stopped = true;
   };
-  window.requestAnimationFrame(WatchMe.update);
+  window.requestAnimationFrame(Clock.update);
 };
 
-window.onload = WatchMe.load;
+window.onload = Clock.load;
