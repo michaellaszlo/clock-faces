@@ -1,6 +1,6 @@
 Clock = {
   initial: {
-    diameter: 300
+    diameter: 180
   },
   textMaker: {
     hour: function (hour) {
@@ -297,11 +297,11 @@ Clock.sectorClockImproved.update = function (hour, minute, second,
   context.clearRect(0, 0, 2 * radius, 2 * radius);
   context.lineWidth = thickness;
 
-  var hourRadius = 0.20 * radius,
+  var hourRadius = 0.22 * radius,
       hourDistance = radius - hourRadius,
-      minuteRadius = 0.19 * radius,
+      minuteRadius = 0.18 * radius,
       minuteDistance = hourDistance - hourRadius - minuteRadius,
-      secondRadius = 0.09 * radius,
+      secondRadius = 0.07 * radius,
       secondDistance = minuteDistance - minuteRadius - secondRadius;
 
   var paintArc = function (value, fraction, valueText, hertz,
@@ -365,6 +365,7 @@ Clock.sectorClockImproved.update = function (hour, minute, second,
       Clock.textMaker.hour(hour), 12, hourDistance, hourRadius, color);
   paintArc(minute, minuteFraction,
       Clock.textMaker.minute(minute), 60, minuteDistance, minuteRadius, color);
+  color.tick = color.circle = '#e2e2e2';
   paintArc(second, secondFraction,
       Clock.textMaker.second(second), 60, secondDistance, secondRadius, color,
       true);
@@ -427,7 +428,7 @@ Clock.sectorClockImprovedInverted.update = function (hour, minute, second,
     // Value text.
     var x = center.x + Math.cos(angle) * (handDistance - thickness / 2),
         y = center.y + Math.sin(angle) * (handDistance - thickness / 2),
-        fontSize = Math.round(1.3 * handRadius);
+        fontSize = Math.round(1.2 * handRadius);
     if (centered) {
       x = center.x;
       y = center.y;

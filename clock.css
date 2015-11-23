@@ -21,6 +21,10 @@
   top: 40px;
 }
 
+canvas {
+  margin: 10px;
+}
+
 #stopButton {
   position: fixed;
   left: 20px;
