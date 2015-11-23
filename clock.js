@@ -370,6 +370,91 @@ Clock.sectorClockImproved.update = function (hour, minute, second,
       true);
 };
 
+// Sector clock with centered seconds, tick marks, animated sectors.
+Clock.sectorClockImprovedInverted = {};
+
+Clock.sectorClockImprovedInverted.update = function (hour, minute, second,
+    millisecond) {
+  var context = Clock.sectorClockImprovedInverted.context,
+      radius = Clock.radius,
+      center = { x: radius, y: radius },
+      thickness = 0.05 * radius;
+  context.clearRect(0, 0, 2 * radius, 2 * radius);
+  context.lineWidth = thickness;
+
+  var secondRadius = 0.14 * radius,
+      secondDistance = radius - secondRadius,
+      minuteRadius = 0.21 * radius,
+      minuteDistance = secondDistance - secondRadius - minuteRadius,
+      hourRadius = 0.15 * radius,
+      hourDistance = minuteDistance - minuteRadius - hourRadius;
+
+  var paintArc = function (value, fraction, valueText, hertz,
+          handDistance, handRadius, color, centered) {
+    var angle = -Math.PI / 2 + value * 2 * Math.PI / hertz,
+        distance = handDistance + handRadius - thickness / 2;
+        //(centered ? 0.2 : -1) * thickness / 2;
+    // Background circle.
+    context.beginPath();
+    context.lineWidth = thickness;
+    context.strokeStyle = color.circle;
+    context.arc(center.x, center.y, distance, 0, 2 * Math.PI);
+    context.stroke();
+    // Background ticks.
+    context.beginPath();
+    context.lineWidth = 1;
+    context.strokeStyle = color.tick;
+    for (var i = 0; i < hertz; ++i) {
+      var a = -Math.PI / 2 + i * 2 * Math.PI / hertz;
+      context.moveTo(center.x + Math.cos(a) * (distance - thickness / 2),
+                     center.y + Math.sin(a) * (distance - thickness / 2));
+      context.lineTo(center.x + Math.cos(a) * (distance + thickness / 2),
+                     center.y + Math.sin(a) * (distance + thickness / 2));
+    }
+    context.stroke();
+    // Current arc.
+    context.beginPath();
+    context.lineWidth = thickness;
+    context.strokeStyle = color.arc.remaining;
+    context.arc(center.x, center.y, distance,
+        angle, angle + 2 * Math.PI / hertz);
+    context.stroke();
+    context.beginPath();
+    context.strokeStyle = color.arc.done;
+    context.arc(center.x, center.y, distance,
+        angle, angle + fraction * 2 * Math.PI / hertz);
+    context.stroke();
+    // Value text.
+    var x = center.x + Math.cos(angle) * (handDistance - thickness / 2),
+        y = center.y + Math.sin(angle) * (handDistance - thickness / 2),
+        fontSize = Math.round(1.3 * handRadius);
+    if (centered) {
+      x = center.x;
+      y = center.y;
+      fontSize *= 2;
+    }
+    var font = fontSize + 'px sans-serif';
+    context.font = font;
+    var m = Clock.measure.text(valueText, font, fontSize);
+    context.fillStyle = '#222';
+    context.fillText(valueText,
+        x - m.fillCenter.x,
+        y - m.fillCenter.y);
+  };
+  var secondFraction = millisecond / 1000,
+      minuteFraction = (second + secondFraction) / 60,
+      hourFraction = (minute + minuteFraction) / 60,
+      color = { circle: '#f4f4f4', tick: '#666',
+        arc: { done: '#222', remaining: '#888' } };
+  paintArc(second, secondFraction,
+      Clock.textMaker.second(second), 60, secondDistance, secondRadius, color);
+  paintArc(minute, minuteFraction,
+      Clock.textMaker.minute(minute), 60, minuteDistance, minuteRadius, color);
+  paintArc(hour, hourFraction,
+      Clock.textMaker.hour(hour), 12, hourDistance, hourRadius, color,
+      true);
+};
+
 
 Clock.update = function () {
   var date = new Date(),
@@ -378,10 +463,9 @@ Clock.update = function () {
       second = date.getSeconds(),
       millisecond = date.getMilliseconds();
 
-  Clock.bubbleClock.update(hour, minute, second, millisecond);
-  Clock.mundaneClock.update(hour, minute, second, millisecond);
-  Clock.sectorClockBasic.update(hour, minute, second, millisecond);
-  Clock.sectorClockImproved.update(hour, minute, second, millisecond);
+  Clock.clocks.forEach(function (clock) {
+    clock.update(hour, minute, second, millisecond);
+  });
 
   if (Clock.stopped) {
     return;
@@ -397,8 +481,11 @@ Clock.load = function () {
   Clock.radius = diameter / 2;
 
   var container = document.getElementById('watchContainer'),
-      clocks = [ Clock.mundaneClock, Clock.bubbleClock,
-                 Clock.sectorClockBasic, Clock.sectorClockImproved ];
+      clocks = Clock.clocks = [
+          Clock.mundaneClock, Clock.bubbleClock,
+          Clock.sectorClockBasic, Clock.sectorClockImproved,
+          Clock.sectorClockImprovedInverted
+      ];
   clocks.forEach(function (clock) {
     var canvas = document.createElement('canvas');
     canvas.width = diameter;
