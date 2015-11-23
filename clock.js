@@ -155,8 +155,7 @@ Clock.mundaneClock.update = function (hour, minute, second, millisecond) {
 
   var hourAngle = -Math.PI / 2 + Math.PI * (hour / 6 + minute / 360),
       minuteAngle = -Math.PI / 2 + (minute / 30 + second / 1800) * Math.PI,
-      secondAngle = -Math.PI / 2 + (second / 30 + millisecond / 30000) *
-          Math.PI,
+      secondAngle = -Math.PI / 2 + (second / 30) * Math.PI,
       hourHandLength = 0.4 * radius,
       hourHandThickness = 4,
       minuteHandLength = 0.65 * radius,
