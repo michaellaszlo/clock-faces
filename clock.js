@@ -1,6 +1,6 @@
 Clock = {
   initial: {
-    diameter: 180
+    diameter: 300
   },
   textMaker: {
     hour: function (hour) {
@@ -157,12 +157,12 @@ Clock.mundaneClock.update = function (hour, minute, second, millisecond) {
   var hourAngle = -Math.PI / 2 + Math.PI * (hour / 6 + minute / 360),
       minuteAngle = -Math.PI / 2 + (minute / 30 + second / 1800) * Math.PI,
       secondAngle = -Math.PI / 2 + (second / 30) * Math.PI,
-      hourHandLength = 0.4 * radius,
-      hourHandThickness = 4,
-      minuteHandLength = 0.65 * radius,
-      minuteHandThickness = 2.5,
+      hourHandLength = 0.28 * radius,
+      hourHandThickness = 0.035 * radius,
+      minuteHandLength = 0.56 * radius,
+      minuteHandThickness = 0.020 * radius,
       secondHandLength = 0.85 * radius,
-      secondHandThickness = 1;
+      secondHandThickness = 0.005 * radius;
   context.strokeStyle = '#222';
   var paintHand = function (angle, length, thickness) {
     context.beginPath();
