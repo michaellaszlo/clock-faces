@@ -295,6 +295,7 @@ Clock.sectorClockImproved.paintArc = function (value, fraction, valueText,
       center = { x: radius, y: radius },
       angle = -Math.PI / 2 + value * 2 * Math.PI / hertz,
       distance = handDistance + handRadius - thickness / 2;
+  // Background circle with zebra stripes or tick marks.
   if (options.zebra) {
     for (var i = 0; i < hertz; ++i) {
       var a = -Math.PI / 2 + i * 2 * Math.PI / hertz;
@@ -327,17 +328,25 @@ Clock.sectorClockImproved.paintArc = function (value, fraction, valueText,
     context.stroke();
   }
   // Current arc.
-  context.beginPath();
   context.lineWidth = thickness;
-  context.strokeStyle = color.arc.remaining;
-  context.arc(center.x, center.y, distance,
-      angle, angle + 2 * Math.PI / hertz);
-  context.stroke();
-  context.beginPath();
-  context.strokeStyle = color.arc.done;
-  context.arc(center.x, center.y, distance,
-      angle, angle + fraction * 2 * Math.PI / hertz);
-  context.stroke();
+  if (options.sweep) {
+    context.beginPath();
+    context.strokeStyle = color.arc.done;
+    var a = angle + fraction * 2 * Math.PI / hertz;
+    context.arc(center.x, center.y, distance, a, a + 2 * Math.PI / hertz);
+    context.stroke();
+  } else {
+    context.beginPath();
+    context.strokeStyle = color.arc.remaining;
+    context.arc(center.x, center.y, distance,
+        angle, angle + 2 * Math.PI / hertz);
+    context.stroke();
+    context.beginPath();
+    context.strokeStyle = color.arc.done;
+    context.arc(center.x, center.y, distance,
+        angle, angle + fraction * 2 * Math.PI / hertz);
+    context.stroke();
+  }
   // Value text.
   var x = center.x + Math.cos(angle) * (handDistance - thickness / 2),
       y = center.y + Math.sin(angle) * (handDistance - thickness / 2),
@@ -383,7 +392,7 @@ Clock.sectorClockImproved.update = function (hour, minute, second,
   paintArc(second, secondFraction,
       Clock.textMaker.second(second), 60,
       secondDistance, secondRadius, thickness, context, color,
-      { centered: true });
+      { centered: true, sweep: false });
 };
 
 // Sector clock with centered seconds, tick marks, animated sectors.
