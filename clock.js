@@ -288,97 +288,101 @@ Clock.sectorClockBasic.update = function (hour, minute, second, millisecond) {
 // Sector clock with centered seconds, tick marks, animated sectors.
 Clock.sectorClockImproved = {};
 
-Clock.sectorClockImproved.update = function (hour, minute, second,
-    millisecond) {
-  var context = Clock.sectorClockImproved.context,
-      radius = Clock.radius,
+Clock.sectorClockImproved.paintArc = function (value, fraction, valueText,
+        hertz, handDistance, handRadius, thickness, context, color, options) {
+  options = options || {};
+  var radius = Clock.radius,
       center = { x: radius, y: radius },
-      thickness = 0.05 * radius;
-  context.clearRect(0, 0, 2 * radius, 2 * radius);
-  context.lineWidth = thickness;
-
-  var hourRadius = 0.22 * radius,
-      hourDistance = radius - hourRadius,
-      minuteRadius = 0.18 * radius,
-      minuteDistance = hourDistance - hourRadius - minuteRadius,
-      secondRadius = 0.07 * radius,
-      secondDistance = minuteDistance - minuteRadius - secondRadius;
-
-  var paintArc = function (value, fraction, valueText, hertz,
-          handDistance, handRadius, color, options) {
-    options = options || {};
-    var angle = -Math.PI / 2 + value * 2 * Math.PI / hertz,
-        distance = handDistance + handRadius - thickness / 2;
-        //(centered ? 0.2 : -1) * thickness / 2;
-    // Background circle.
+      angle = -Math.PI / 2 + value * 2 * Math.PI / hertz,
+      distance = handDistance + handRadius - thickness / 2;
+  if (options.zebra) {
+    for (var i = 0; i < hertz; ++i) {
+      var a = -Math.PI / 2 + i * 2 * Math.PI / hertz;
+      context.beginPath();
+      context.strokeStyle = (i % 2 == 0 ? color.circle : color.stripe);
+      context.arc(center.x, center.y, distance, a, a + 4 * Math.PI / hertz);
+      context.stroke();
+    }
+    context.beginPath();
+    context.strokeStyle = color.circle;
+    context.arc(center.x, center.y, distance,
+        -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI / hertz);
+    context.stroke();
+  } else {
     context.beginPath();
     context.lineWidth = thickness;
     context.strokeStyle = color.circle;
     context.arc(center.x, center.y, distance, 0, 2 * Math.PI);
     context.stroke();
-    // Zebra stripes or tick marks.
-    if (options.zebra) {
-      context.strokeStyle = color.stripe;
-      for (var i = 0; i < hertz; i += 2) {
-        var a = -Math.PI / 2 + i * 2 * Math.PI / hertz;
-        context.beginPath();
-        context.arc(center.x, center.y, distance, a, a + 2 * Math.PI / hertz);
-        context.stroke();
-      }
-    } else {
-      context.beginPath();
-      context.lineWidth = 1;
-      context.strokeStyle = color.tick;
-      for (var i = 0; i < hertz; ++i) {
-        var a = -Math.PI / 2 + i * 2 * Math.PI / hertz;
-        context.moveTo(center.x + Math.cos(a) * (distance - thickness / 2),
-                       center.y + Math.sin(a) * (distance - thickness / 2));
-        context.lineTo(center.x + Math.cos(a) * (distance + thickness / 2),
-                       center.y + Math.sin(a) * (distance + thickness / 2));
-      }
-      context.stroke();
-    }
-    // Current arc.
     context.beginPath();
-    context.lineWidth = thickness;
-    context.strokeStyle = color.arc.remaining;
-    context.arc(center.x, center.y, distance,
-        angle, angle + 2 * Math.PI / hertz);
-    context.stroke();
-    context.beginPath();
-    context.strokeStyle = color.arc.done;
-    context.arc(center.x, center.y, distance,
-        angle, angle + fraction * 2 * Math.PI / hertz);
-    context.stroke();
-    // Value text.
-    var x = center.x + Math.cos(angle) * (handDistance - thickness / 2),
-        y = center.y + Math.sin(angle) * (handDistance - thickness / 2),
-        fontSize = Math.round(1.3 * handRadius);
-    if (options.centered) {
-      x = center.x;
-      y = center.y;
-      fontSize *= 2;
+    context.lineWidth = 1;
+    context.strokeStyle = color.tick;
+    for (var i = 0; i < hertz; ++i) {
+      var a = -Math.PI / 2 + i * 2 * Math.PI / hertz;
+      context.moveTo(center.x + Math.cos(a) * (distance - thickness / 2),
+                     center.y + Math.sin(a) * (distance - thickness / 2));
+      context.lineTo(center.x + Math.cos(a) * (distance + thickness / 2),
+                     center.y + Math.sin(a) * (distance + thickness / 2));
     }
-    var font = fontSize + 'px sans-serif';
-    context.font = font;
-    var m = Clock.measure.text(valueText, font, fontSize);
-    context.fillStyle = '#222';
-    context.fillText(valueText,
-        x - m.fillCenter.x,
-        y - m.fillCenter.y);
-  };
-  var secondFraction = millisecond / 1000,
+    context.stroke();
+  }
+  // Current arc.
+  context.beginPath();
+  context.lineWidth = thickness;
+  context.strokeStyle = color.arc.remaining;
+  context.arc(center.x, center.y, distance,
+      angle, angle + 2 * Math.PI / hertz);
+  context.stroke();
+  context.beginPath();
+  context.strokeStyle = color.arc.done;
+  context.arc(center.x, center.y, distance,
+      angle, angle + fraction * 2 * Math.PI / hertz);
+  context.stroke();
+  // Value text.
+  var x = center.x + Math.cos(angle) * (handDistance - thickness / 2),
+      y = center.y + Math.sin(angle) * (handDistance - thickness / 2),
+      fontSize = Math.round(1.3 * handRadius);
+  if (options.centered) {
+    x = center.x;
+    y = center.y;
+    fontSize *= 2;
+  }
+  var font = fontSize + 'px sans-serif';
+  context.font = font;
+  var m = Clock.measure.text(valueText, font, fontSize);
+  context.fillStyle = '#222';
+  context.fillText(valueText, x - m.fillCenter.x, y - m.fillCenter.y);
+};
+
+Clock.sectorClockImproved.update = function (hour, minute, second,
+    millisecond) {
+  var context = Clock.sectorClockImproved.context,
+      radius = Clock.radius,
+      thickness = 0.05 * radius,
+      hourRadius = 0.22 * radius,
+      hourDistance = radius - hourRadius,
+      minuteRadius = 0.18 * radius,
+      minuteDistance = hourDistance - hourRadius - minuteRadius,
+      secondRadius = 0.07 * radius,
+      secondDistance = minuteDistance - minuteRadius - secondRadius,
+      secondFraction = millisecond / 1000,
       minuteFraction = (second + secondFraction) / 60,
       hourFraction = (minute + minuteFraction) / 60,
       color = { circle: '#f4f4f4', tick: '#666', stripe: '#e8e8e8',
         arc: { done: '#222', remaining: '#888' } };
+  context.clearRect(0, 0, 2 * radius, 2 * radius);
+  context.lineWidth = thickness;
+  var paintArc = Clock.sectorClockImproved.paintArc;
   paintArc(hour, hourFraction,
-      Clock.textMaker.hour(hour), 12, hourDistance, hourRadius, color);
+      Clock.textMaker.hour(hour), 12,
+      hourDistance, hourRadius, thickness, context, color);
   paintArc(minute, minuteFraction,
-      Clock.textMaker.minute(minute), 60, minuteDistance, minuteRadius, color);
+      Clock.textMaker.minute(minute), 60,
+      minuteDistance, minuteRadius, thickness, context, color);
   color.tick = color.circle = '#eee';
   paintArc(second, secondFraction,
-      Clock.textMaker.second(second), 60, secondDistance, secondRadius, color,
+      Clock.textMaker.second(second), 60,
+      secondDistance, secondRadius, thickness, context, color,
       { centered: true });
 };
 
@@ -389,93 +393,32 @@ Clock.sectorClockImprovedInverted.update = function (hour, minute, second,
     millisecond) {
   var context = Clock.sectorClockImprovedInverted.context,
       radius = Clock.radius,
-      center = { x: radius, y: radius },
-      thickness = 0.05 * radius;
-  context.clearRect(0, 0, 2 * radius, 2 * radius);
-  context.lineWidth = thickness;
-
-  var secondRadius = 0.14 * radius,
+      thickness = 0.05 * radius,
+      secondRadius = 0.14 * radius,
       secondDistance = radius - secondRadius,
       minuteRadius = 0.21 * radius,
       minuteDistance = secondDistance - secondRadius - minuteRadius,
       hourRadius = 0.15 * radius,
-      hourDistance = minuteDistance - minuteRadius - hourRadius;
-
-  var paintArc = function (value, fraction, valueText, hertz,
-          handDistance, handRadius, color, options) {
-    var angle = -Math.PI / 2 + value * 2 * Math.PI / hertz,
-        distance = handDistance + handRadius - thickness / 2;
-    options = options || {};
-    // Background circle.
-    context.beginPath();
-    context.lineWidth = thickness;
-    context.strokeStyle = color.circle;
-    context.arc(center.x, center.y, distance, 0, 2 * Math.PI);
-    context.stroke();
-    // Zebra stripes or tick marks.
-    if (options.zebra) {
-      context.strokeStyle = color.stripe;
-      for (var i = 0; i < hertz; i += 2) {
-        var a = -Math.PI / 2 + i * 2 * Math.PI / hertz;
-        context.beginPath();
-        context.arc(center.x, center.y, distance, a, a + 2 * Math.PI / hertz);
-        context.stroke();
-      }
-    } else {
-      context.beginPath();
-      context.lineWidth = 1;
-      context.strokeStyle = color.tick;
-      for (var i = 0; i < hertz; ++i) {
-        var a = -Math.PI / 2 + i * 2 * Math.PI / hertz;
-        context.moveTo(center.x + Math.cos(a) * (distance - thickness / 2),
-                       center.y + Math.sin(a) * (distance - thickness / 2));
-        context.lineTo(center.x + Math.cos(a) * (distance + thickness / 2),
-                       center.y + Math.sin(a) * (distance + thickness / 2));
-      }
-      context.stroke();
-    }
-    // Current arc.
-    context.beginPath();
-    context.lineWidth = thickness;
-    context.strokeStyle = color.arc.remaining;
-    context.arc(center.x, center.y, distance,
-        angle, angle + 2 * Math.PI / hertz);
-    context.stroke();
-    context.beginPath();
-    context.strokeStyle = color.arc.done;
-    context.arc(center.x, center.y, distance,
-        angle, angle + fraction * 2 * Math.PI / hertz);
-    context.stroke();
-    // Value text.
-    var x = center.x + Math.cos(angle) * (handDistance - thickness / 2),
-        y = center.y + Math.sin(angle) * (handDistance - thickness / 2),
-        fontSize = Math.round(1.2 * handRadius);
-    if (options.centered) {
-      x = center.x;
-      y = center.y;
-      fontSize *= 2;
-    }
-    var font = fontSize + 'px sans-serif';
-    context.font = font;
-    var m = Clock.measure.text(valueText, font, fontSize);
-    context.fillStyle = '#222';
-    context.fillText(valueText,
-        x - m.fillCenter.x,
-        y - m.fillCenter.y);
-  };
-  var secondFraction = millisecond / 1000,
+      hourDistance = minuteDistance - minuteRadius - hourRadius,
+      secondFraction = millisecond / 1000,
       minuteFraction = (second + secondFraction) / 60,
       hourFraction = (minute + minuteFraction) / 60,
       color = { circle: '#f4f4f4', tick: '#666', stripe: '#e8e8e8',
         arc: { done: '#222', remaining: '#888' } };
+  context.clearRect(0, 0, 2 * radius, 2 * radius);
+  context.lineWidth = thickness;
+  var paintArc = Clock.sectorClockImproved.paintArc;
   paintArc(second, secondFraction,
-      Clock.textMaker.second(second), 60, secondDistance, secondRadius, color,
+      Clock.textMaker.second(second), 60,
+      secondDistance, secondRadius, thickness, context, color,
       { zebra: true });
   paintArc(minute, minuteFraction,
-      Clock.textMaker.minute(minute), 60, minuteDistance, minuteRadius, color,
+      Clock.textMaker.minute(minute), 60,
+      minuteDistance, minuteRadius, thickness, context, color,
       { zebra: true });
   paintArc(hour, hourFraction,
-      Clock.textMaker.hour(hour), 12, hourDistance, hourRadius, color,
+      Clock.textMaker.hour(hour), 12,
+      hourDistance, hourRadius, thickness, context, color,
       { centered: true });
 };
 
