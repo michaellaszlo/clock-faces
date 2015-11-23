@@ -239,9 +239,9 @@ Clock.sectorClockBasic.update = function (hour, minute, second, millisecond) {
   var context = Clock.sectorClockBasic.context,
       radius = Clock.radius,
       center = { x: radius, y: radius },
-      thickness = 5;
+      thickness = 0.05 * radius;
   context.clearRect(0, 0, 2 * radius, 2 * radius);
-  context.lineWidth = 0.04 * radius;
+  context.lineWidth = thickness;
 
   var hourRadius = 0.20 * radius,
       hourDistance = radius - hourRadius,
@@ -293,9 +293,9 @@ Clock.sectorClockImproved.update = function (hour, minute, second,
   var context = Clock.sectorClockImproved.context,
       radius = Clock.radius,
       center = { x: radius, y: radius },
-      thickness = 6;
+      thickness = 0.05 * radius;
   context.clearRect(0, 0, 2 * radius, 2 * radius);
-  context.lineWidth = 0.04 * radius;
+  context.lineWidth = thickness;
 
   var hourRadius = 0.20 * radius,
       hourDistance = radius - hourRadius,
