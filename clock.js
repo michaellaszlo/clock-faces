@@ -107,6 +107,7 @@ Clock.measure.text = function (text, font, fontSize) {
   return measurement;
 };
 
+// Mundane clock.
 Clock.mundaneClock = {};
 
 Clock.mundaneClock.update = function (hour, minute, second, millisecond) {
@@ -177,6 +178,7 @@ Clock.mundaneClock.update = function (hour, minute, second, millisecond) {
   paintHand(secondAngle, secondHandLength, secondHandThickness);
 };
 
+// Bubble clock.
 Clock.bubbleClock = {};
 
 Clock.bubbleClock.update = function (hour, minute, second, millisecond) {
@@ -190,11 +192,11 @@ Clock.bubbleClock.update = function (hour, minute, second, millisecond) {
   context.fill();
 
   var gap = 0.01 * radius,
-      hourRadius = 0.21 * radius,
+      hourRadius = 0.210 * radius,
       hourDistance = radius - hourRadius,
-      minuteRadius = 0.18 * radius,
+      minuteRadius = 0.165 * radius,
       minuteDistance = hourDistance - gap - hourRadius - minuteRadius,
-      secondRadius = 0.085 * radius,
+      secondRadius = 0.100 * radius,
       secondDistance = minuteDistance - gap - minuteRadius - secondRadius;
 
   var paint = function (value, textMaker, hertz, distance, radius,
@@ -230,6 +232,61 @@ Clock.bubbleClock.update = function (hour, minute, second, millisecond) {
       secondDistance, secondRadius, '#fff', '#888');
 };
 
+// Sector clock.
+Clock.sectorClockBasic = {};
+
+Clock.sectorClockBasic.update = function (hour, minute, second, millisecond) {
+  var context = Clock.sectorClockBasic.context,
+      radius = Clock.radius,
+      center = { x: radius, y: radius },
+      thickness = 1;
+  context.clearRect(0, 0, 2 * radius, 2 * radius);
+  context.lineWidth = thickness;
+
+  var hourRadius = 0.20 * radius,
+      hourDistance = radius - hourRadius,
+      minuteRadius = 0.16 * radius,
+      minuteDistance = hourDistance - hourRadius - minuteRadius,
+      secondRadius = 0.12 * radius,
+      secondDistance = minuteDistance - minuteRadius - secondRadius;
+
+  var paintArc = function (value, valueText, hertz, handDistance, handRadius,
+        edgeProportion, circleColor, arcColor) {
+    var angle = -Math.PI / 2 + value * 2 * Math.PI / hertz;
+    thickness = edgeProportion * 2 * handRadius;
+    // Background circle.
+    context.lineWidth = thickness;
+    context.beginPath();
+    context.strokeStyle = circleColor;
+    context.arc(center.x, center.y, handDistance + handRadius - thickness / 2,
+        0, 2 * Math.PI);
+    context.stroke();
+    // Foreground arc.
+    context.beginPath();
+    context.strokeStyle = arcColor;
+    context.arc(center.x, center.y, handDistance + handRadius - thickness / 2,
+        angle - Math.PI / hertz, angle + Math.PI / hertz);
+    context.stroke();
+    // Value text.
+    var x = center.x + Math.cos(angle) * (handDistance - thickness / 2),
+        y = center.y + Math.sin(angle) * (handDistance - thickness / 2),
+        fontSize = Math.round(1.2 * handRadius),
+        font = fontSize + 'px sans-serif';
+    context.font = font;
+    var m = Clock.measure.text(valueText, font, fontSize);
+    context.fillStyle = '#222';
+    context.fillText(valueText,
+        x - m.fillCenter.x,
+        y - m.fillCenter.y);
+  };
+  paintArc(hour, Clock.textMaker.hour(hour), 12,
+      hourDistance, hourRadius, 0.105, '#f4f4f4', '#444');
+  paintArc(minute, Clock.textMaker.minute(minute), 60,
+      minuteDistance, minuteRadius, 0.135, '#f4f4f4', '#444');
+  paintArc(second, Clock.textMaker.second(second), 60,
+      secondDistance, secondRadius, 0.165, '#f4f4f4', '#444');
+};
+
 Clock.update = function () {
   var date = new Date(),
       hour = date.getHours() % 12,
@@ -239,6 +296,7 @@ Clock.update = function () {
 
   Clock.bubbleClock.update(hour, minute, second, millisecond);
   Clock.mundaneClock.update(hour, minute, second, millisecond);
+  Clock.sectorClockBasic.update(hour, minute, second, millisecond);
 
   if (Clock.stopped) {
     return;
@@ -253,9 +311,10 @@ Clock.load = function () {
   var diameter = Clock.diameter = Clock.initial.diameter;
   Clock.radius = diameter / 2;
 
-  var container = document.getElementById('watchContainer');
-
-  [ Clock.mundaneClock, Clock.bubbleClock ].forEach(function (clock) {
+  var container = document.getElementById('watchContainer'),
+      clocks = [ Clock.mundaneClock, Clock.bubbleClock,
+                 Clock.sectorClockBasic ];
+  clocks.forEach(function (clock) {
     var canvas = document.createElement('canvas');
     canvas.width = diameter;
     canvas.height = diameter;
