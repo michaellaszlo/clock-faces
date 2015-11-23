@@ -107,10 +107,56 @@ Clock.measure.text = function (text, font, fontSize) {
   return measurement;
 };
 
+Clock.mundaneClock = {};
+
+Clock.mundaneClock.update = function (hour, minute, second) {
+  var context = Clock.mundaneClock.context,
+      radius = Clock.radius,
+      center = { x: radius, y: radius };
+  context.clearRect(0, 0, 2 * radius, 2 * radius);
+
+  var tickRadius = 0.033 * radius,
+      tickDistance = radius - tickRadius,
+      hourRadius = 0.21 * radius,
+      hourDistance = tickDistance - tickRadius - hourRadius;
+
+  for (var i = 0; i < 60; ++i) {
+    var angle = -Math.PI / 2 + i * Math.PI / 30;
+    if (i % 5 == 0) {
+      var x = center.x + Math.cos(angle) * hourDistance,
+          y = center.y + Math.sin(angle) * hourDistance,
+          fontSize = 1.33 * hourRadius,
+          font = fontSize + 'px sans-serif',
+          text = '' + (i == 0 ? 12 : i / 5);
+      context.font = font;
+      var m = Clock.measure.text(text, font, fontSize);
+      context.fillStyle = '#444';
+      context.fillText(text, x - m.fillCenter.x, y - m.fillCenter.y);
+
+      context.lineWidth = 4;
+      context.strokeStyle = '#222';
+    } else {
+      context.lineWidth = 1;
+      context.strokeStyle = '#666';
+    }
+    var a = {
+          x: center.x + Math.cos(angle) * (tickDistance - tickRadius),
+          y: center.y + Math.sin(angle) * (tickDistance - tickRadius)
+        },
+        b = {
+          x: center.x + Math.cos(angle) * (tickDistance + tickRadius),
+          y: center.y + Math.sin(angle) * (tickDistance + tickRadius)
+        };
+    context.beginPath();
+    context.moveTo(a.x, a.y);
+    context.lineTo(b.x, b.y);
+    context.stroke();
+  }
+};
+
 Clock.bubbleClock = {};
 
 Clock.bubbleClock.update = function (hour, minute, second) {
-  // Draw background graphics.
   var context = Clock.bubbleClock.context,
       radius = Clock.radius,
       center = { x: radius, y: radius };
@@ -128,15 +174,13 @@ Clock.bubbleClock.update = function (hour, minute, second) {
       secondRadius = 0.085 * radius,
       secondDistance = minuteDistance - gap - minuteRadius - secondRadius;
 
-  var paintArc = function (value, textMaker, hertz, distance, radius,
+  var paint = function (value, textMaker, hertz, distance, radius,
         color, discColor) {
     var angle = -Math.PI / 2 + value * 2 * Math.PI / hertz,
-        text = textMaker(value);
-    // Value position.
-    var x = center.x + Math.cos(angle) * distance,
-        y = center.y + Math.sin(angle) * distance;
-    // Value text.
-    var fontSize = 1.33 * radius,
+        text = textMaker(value),
+        x = center.x + Math.cos(angle) * distance,
+        y = center.y + Math.sin(angle) * distance,
+        fontSize = 1.33 * radius,
         font = fontSize + 'px sans-serif';
     context.font = font;
     var m = Clock.measure.text(text, font, fontSize);
@@ -151,15 +195,15 @@ Clock.bubbleClock.update = function (hour, minute, second) {
   };
   for (var h = 0; h < 12; ++h) {
     if (h == hour) {
-      paintArc(h, Clock.textMaker.hour, 12,
+      paint(h, Clock.textMaker.hour, 12,
           hourDistance, hourRadius, '#fff', '#444');
     } else {
-      paintArc(h, Clock.textMaker.hour, 12, hourDistance, hourRadius, '#aaa');
+      paint(h, Clock.textMaker.hour, 12, hourDistance, hourRadius, '#444');
     }
   }
-  paintArc(minute, Clock.textMaker.minute, 60,
+  paint(minute, Clock.textMaker.minute, 60,
       minuteDistance, minuteRadius, '#fff', '#666');
-  paintArc(second, Clock.textMaker.second, 60,
+  paint(second, Clock.textMaker.second, 60,
       secondDistance, secondRadius, '#fff', '#888');
 };
 
@@ -170,6 +214,7 @@ Clock.update = function () {
       second = date.getSeconds();
 
   Clock.bubbleClock.update(hour, minute, second);
+  Clock.mundaneClock.update(hour, minute, second);
 
   if (Clock.stopped) {
     return;
@@ -186,7 +231,7 @@ Clock.load = function () {
 
   var container = document.getElementById('watchContainer');
 
-  [ Clock.bubbleClock ].forEach(function (clock) {
+  [ Clock.mundaneClock, Clock.bubbleClock ].forEach(function (clock) {
     var canvas = document.createElement('canvas');
     canvas.width = diameter;
     canvas.height = diameter;
