@@ -109,7 +109,7 @@ Clock.measure.text = function (text, font, fontSize) {
 
 Clock.mundaneClock = {};
 
-Clock.mundaneClock.update = function (hour, minute, second) {
+Clock.mundaneClock.update = function (hour, minute, second, millisecond) {
   var context = Clock.mundaneClock.context,
       radius = Clock.radius,
       center = { x: radius, y: radius };
@@ -152,11 +152,35 @@ Clock.mundaneClock.update = function (hour, minute, second) {
     context.lineTo(b.x, b.y);
     context.stroke();
   }
+
+  var hourAngle = -Math.PI / 2 + Math.PI * (hour / 6 + minute / 360),
+      minuteAngle = -Math.PI / 2 + (minute / 30 + second / 1800) * Math.PI,
+      secondAngle = -Math.PI / 2 + (second / 30 + millisecond / 30000) *
+          Math.PI,
+      hourHandLength = 0.4 * radius,
+      hourHandThickness = 4,
+      minuteHandLength = 0.65 * radius,
+      minuteHandThickness = 2.5,
+      secondHandLength = 0.85 * radius,
+      secondHandThickness = 1;
+  context.strokeStyle = '#222';
+  var paintHand = function (angle, length, thickness) {
+    context.beginPath();
+    context.lineWidth = thickness;
+    context.moveTo(center.x + Math.cos(angle + Math.PI) * 0.06 * length,
+                   center.y + Math.sin(angle + Math.PI) * 0.06 * length);
+    context.lineTo(center.x + Math.cos(angle) * length,
+                   center.y + Math.sin(angle) * length);
+    context.stroke();
+  }
+  paintHand(hourAngle, hourHandLength, hourHandThickness);
+  paintHand(minuteAngle, minuteHandLength, minuteHandThickness);
+  paintHand(secondAngle, secondHandLength, secondHandThickness);
 };
 
 Clock.bubbleClock = {};
 
-Clock.bubbleClock.update = function (hour, minute, second) {
+Clock.bubbleClock.update = function (hour, minute, second, millisecond) {
   var context = Clock.bubbleClock.context,
       radius = Clock.radius,
       center = { x: radius, y: radius };
@@ -211,10 +235,11 @@ Clock.update = function () {
   var date = new Date(),
       hour = date.getHours() % 12,
       minute = date.getMinutes(),
-      second = date.getSeconds();
+      second = date.getSeconds(),
+      millisecond = date.getMilliseconds();
 
-  Clock.bubbleClock.update(hour, minute, second);
-  Clock.mundaneClock.update(hour, minute, second);
+  Clock.bubbleClock.update(hour, minute, second, millisecond);
+  Clock.mundaneClock.update(hour, minute, second, millisecond);
 
   if (Clock.stopped) {
     return;
