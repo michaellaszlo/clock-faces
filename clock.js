@@ -305,21 +305,20 @@ Clock.sectorClockImproved.update = function (hour, minute, second,
       secondDistance = minuteDistance - minuteRadius - secondRadius;
 
   var paintArc = function (value, fraction, valueText, hertz,
-        handDistance, handRadius, circleColor, arcColor, tickColor,
-        centered) {
+          handDistance, handRadius, color, centered) {
     var angle = -Math.PI / 2 + value * 2 * Math.PI / hertz,
         distance = handDistance + handRadius - thickness / 2;
         //(centered ? 0.2 : -1) * thickness / 2;
     // Background circle.
     context.beginPath();
     context.lineWidth = thickness;
-    context.strokeStyle = circleColor;
+    context.strokeStyle = color.circle;
     context.arc(center.x, center.y, distance, 0, 2 * Math.PI);
     context.stroke();
     // Background ticks.
     context.beginPath();
     context.lineWidth = 1;
-    context.strokeStyle = tickColor;
+    context.strokeStyle = color.tick;
     for (var i = 0; i < hertz; ++i) {
       var a = -Math.PI / 2 + i * 2 * Math.PI / hertz;
       context.moveTo(center.x + Math.cos(a) * (distance - thickness / 2),
@@ -328,13 +327,17 @@ Clock.sectorClockImproved.update = function (hour, minute, second,
                      center.y + Math.sin(a) * (distance + thickness / 2));
     }
     context.stroke();
-    // Foreground arc.
+    // Current arc.
     context.beginPath();
     context.lineWidth = thickness;
-    context.strokeStyle = arcColor;
+    context.strokeStyle = color.arc.remaining;
     context.arc(center.x, center.y, distance,
         angle, angle + 2 * Math.PI / hertz);
-        //angle - Math.PI / hertz, angle + Math.PI / hertz);
+    context.stroke();
+    context.beginPath();
+    context.strokeStyle = color.arc.done;
+    context.arc(center.x, center.y, distance,
+        angle, angle + fraction * 2 * Math.PI / hertz);
     context.stroke();
     // Value text.
     var x = center.x + Math.cos(angle) * (handDistance - thickness / 2),
@@ -353,15 +356,18 @@ Clock.sectorClockImproved.update = function (hour, minute, second,
         x - m.fillCenter.x,
         y - m.fillCenter.y);
   };
-  paintArc(hour, 0,
-      Clock.textMaker.hour(hour), 12,
-      hourDistance, hourRadius, '#f4f4f4', '#444', '#666');
-  paintArc(minute, 0,
-      Clock.textMaker.minute(minute), 60,
-      minuteDistance, minuteRadius, '#f4f4f4', '#444', '#999');
-  paintArc(second, 0,
-      Clock.textMaker.second(second), 60,
-      secondDistance, secondRadius, '#f4f4f4', '#444', '#ccc', true);
+  var secondFraction = millisecond / 1000,
+      minuteFraction = (second + secondFraction) / 60,
+      hourFraction = (minute + minuteFraction) / 60,
+      color = { circle: '#f4f4f4', tick: '#666',
+        arc: { done: '#222', remaining: '#888' } };
+  paintArc(hour, hourFraction,
+      Clock.textMaker.hour(hour), 12, hourDistance, hourRadius, color);
+  paintArc(minute, minuteFraction,
+      Clock.textMaker.minute(minute), 60, minuteDistance, minuteRadius, color);
+  paintArc(second, secondFraction,
+      Clock.textMaker.second(second), 60, secondDistance, secondRadius, color,
+      true);
 };
 
 
