@@ -348,10 +348,13 @@ Clock.sectorClockImproved.paintArc = function (value, fraction, valueText,
     context.stroke();
   }
   // Value text.
+  if (options.textCenteredInArc) {
+    angle += Math.PI / hertz;
+  }
   var x = center.x + Math.cos(angle) * (handDistance - thickness / 2),
       y = center.y + Math.sin(angle) * (handDistance - thickness / 2),
       fontSize = Math.round(1.3 * handRadius);
-  if (options.centered) {
+  if (options.centerOfCircle) {
     x = center.x;
     y = center.y;
     fontSize *= 2;
@@ -392,7 +395,7 @@ Clock.sectorClockImproved.update = function (hour, minute, second,
   paintArc(second, secondFraction,
       Clock.textMaker.second(second), 60,
       secondDistance, secondRadius, thickness, context, color,
-      { centered: true, sweep: false });
+      { centerOfCircle: true, sweep: false });
 };
 
 // Sector clock with centered seconds, tick marks, animated sectors.
@@ -420,7 +423,7 @@ Clock.sectorClockImprovedInverted.update = function (hour, minute, second,
   paintArc(second, secondFraction,
       Clock.textMaker.second(second), 60,
       secondDistance, secondRadius, thickness, context, color,
-      { zebra: true });
+      { zebra: true, textCenteredInArc: false });
   paintArc(minute, minuteFraction,
       Clock.textMaker.minute(minute), 60,
       minuteDistance, minuteRadius, thickness, context, color,
@@ -428,7 +431,7 @@ Clock.sectorClockImprovedInverted.update = function (hour, minute, second,
   paintArc(hour, hourFraction,
       Clock.textMaker.hour(hour), 12,
       hourDistance, hourRadius, thickness, context, color,
-      { centered: true });
+      { centerOfCircle: true });
 };
 
 
