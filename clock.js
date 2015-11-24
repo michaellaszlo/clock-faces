@@ -363,7 +363,21 @@ Clock.sectorClockImproved.paintArc = function (value, fraction, valueText,
   context.font = font;
   var m = Clock.measure.text(valueText, font, fontSize);
   context.fillStyle = '#222';
-  context.fillText(valueText, x - m.fillCenter.x, y - m.fillCenter.y);
+  if (options.rotateText) {
+    context.save();
+    context.translate(x, y);
+    if (angle > Math.PI || angle <= 0) {
+      context.rotate(angle + Math.PI / 2);
+    } else {
+      context.rotate(angle + 3 * Math.PI / 2);
+    }
+    context.translate(-m.fillCenter.x, -m.fillCenter.y);
+    context.fillText(valueText, 0, 0);
+    context.restore();
+  }
+  else {
+    context.fillText(valueText, x - m.fillCenter.x, y - m.fillCenter.y);
+  }
 };
 
 Clock.sectorClockImproved.update = function (hour, minute, second,
@@ -423,11 +437,11 @@ Clock.sectorClockImprovedInverted.update = function (hour, minute, second,
   paintArc(second, secondFraction,
       Clock.textMaker.second(second), 60,
       secondDistance, secondRadius, thickness, context, color,
-      { zebra: true, textCenteredInArc: false });
+      { zebra: true, textCenteredInArc: false, rotateText: false });
   paintArc(minute, minuteFraction,
       Clock.textMaker.minute(minute), 60,
       minuteDistance, minuteRadius, thickness, context, color,
-      { zebra: true });
+      { zebra: true, rotateText: false });
   paintArc(hour, hourFraction,
       Clock.textMaker.hour(hour), 12,
       hourDistance, hourRadius, thickness, context, color,
