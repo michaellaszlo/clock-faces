@@ -2,6 +2,7 @@ Clock = {
   initial: {
     diameter: 300
   },
+  font: "'Roboto Condensed', sans-serif",
   textMaker: {
     hour: function (hour) {
       return (hour == 0 ? 12: hour) + '';
@@ -127,7 +128,7 @@ Clock.mundaneClock.update = function (hour, minute, second, millisecond) {
       var x = center.x + Math.cos(angle) * hourDistance,
           y = center.y + Math.sin(angle) * hourDistance,
           fontSize = 1.33 * hourRadius,
-          font = fontSize + 'px sans-serif',
+          font = fontSize + 'px ' + Clock.font,
           text = '' + (i == 0 ? 12 : i / 5);
       context.font = font;
       var m = Clock.measure.text(text, font, fontSize);
@@ -206,7 +207,7 @@ Clock.bubbleClock.update = function (hour, minute, second, millisecond) {
         x = center.x + Math.cos(angle) * distance,
         y = center.y + Math.sin(angle) * distance,
         fontSize = 1.33 * radius,
-        font = fontSize + 'px sans-serif';
+        font = fontSize + 'px ' + Clock.font;
     context.font = font;
     var m = Clock.measure.text(text, font, fontSize);
     if (discColor) {
@@ -269,7 +270,7 @@ Clock.sectorClockBasic.update = function (hour, minute, second, millisecond) {
     var x = center.x + Math.cos(angle) * (handDistance - thickness / 2),
         y = center.y + Math.sin(angle) * (handDistance - thickness / 2),
         fontSize = Math.round(1.2 * handRadius),
-        font = fontSize + 'px sans-serif';
+        font = fontSize + 'px ' + Clock.font;
     context.font = font;
     var m = Clock.measure.text(valueText, font, fontSize);
     context.fillStyle = '#222';
@@ -359,7 +360,7 @@ Clock.sectorClockImproved.paintArc = function (value, fraction, valueText,
     y = center.y;
     fontSize *= 2;
   }
-  var font = fontSize + 'px sans-serif';
+  var font = fontSize + 'px ' + Clock.font;
   context.font = font;
   var m = Clock.measure.text(valueText, font, fontSize);
   context.fillStyle = '#222';
@@ -445,7 +446,7 @@ Clock.sectorClockImprovedInverted.update = function (hour, minute, second,
   paintArc(hour, hourFraction,
       Clock.textMaker.hour(hour), 12,
       hourDistance, hourRadius, thickness, context, color,
-      { centerOfCircle: true });
+      { zebra: true, centerOfCircle: true });
 };
 
 
