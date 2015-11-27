@@ -97,6 +97,8 @@ Clock.measure.text = function (text, font, fontSize) {
   if (cache[font] === undefined) {
     cache[font] = {};
   }
+  var x0 = width / 2,
+      y0 = 4 * height / 11;
   var measurement = cache[font][text] = {
     xMin: xMin, xMax: xMax, yMin: yMin, yMax: yMax,
     radius: radius,
@@ -456,6 +458,8 @@ Clock.update = function () {
       minute = date.getMinutes(),
       second = date.getSeconds(),
       millisecond = date.getMilliseconds();
+  minute = second;
+  hour = second % 12 + 1;
 
   Clock.clocks.forEach(function (clock) {
     clock.update(hour, minute, second, millisecond);
