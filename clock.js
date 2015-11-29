@@ -74,6 +74,8 @@ Clock.measure.text = function (text, font, fontSize) {
     }
   }
   console.log(fontSize + 'px', text, nominalWidth, xMax - xMin + 1, xMin, xMax);
+  context.fillStyle = '#eee';
+  context.fillRect(0, 0, canvas.width, canvas.height);
   context.fillStyle = '#ccc';
   context.fillRect(xMin, yMin, xMax - xMin + 1, yMax - yMin + 1);
   var x0 = xMin + (xMin + xMax) / 2,
@@ -482,6 +484,7 @@ Clock.update = function () {
 Clock.load = function () {
   Clock.measure.canvas = document.createElement('canvas');
   Clock.measure.context = Clock.measure.canvas.getContext('2d');
+  Clock.measure.canvas.width = Clock.measure.canvas.height = 5;
   document.getElementById('wrapper').appendChild(Clock.measure.canvas);
 
   var diameter = Clock.diameter = Clock.initial.diameter;
