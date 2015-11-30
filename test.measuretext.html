@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title> clock </title>
+<script src="https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js"></script>
+<script>
+WebFont.load({
+  google: { families: ['Roboto Condensed', 'Roboto Slab', 'Roboto'] }
+});
+</script>
+<link rel="stylesheet" href="test.measuretext.css" />
+<script src="measuretext.js"></script>
+<script>
+window.onload = MeasureText.loadTest;
+</script>
+</head>
+<body>
+<div id="wrapper">
+
+<h1> MeasureText </h1>
+
+<div id="canvasContainer"></div>
+
+<input id="textInput"></input>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,32 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+}
+
+#wrapper {
+}
+
+h1 {
+  color: #666;
+  padding-left: 300px;
+}
+
+#canvasContainer {
+  position: fixed;
+  left: 300px;
+  bottom: 250px;
+}
+
+#textInput {
+  position: fixed;
+  left: 300px;
+  bottom: 200px;
+  font-family: 'Roboto Condensed', sans-serif;
+  font-size: 36px;
+}
+
