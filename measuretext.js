@@ -93,9 +93,36 @@ MeasureText.measure = function (text, font, fontSize) {
 
 MeasureText.loadTest = function () {
   var input = document.getElementById('textInput'),
-      container = document.getElementById('canvasContainer');
+      container = document.getElementById('canvasContainer'),
+      canvas = document.createElement('canvas'),
+      context = canvas.getContext('2d');
+  container.appendChild(canvas);
+  var fontSize = 24,
+      fontString = fontSize + "px 'Roboto Condensed', sans-serif";
+  canvas.width = canvas.height = 0;
+
   input.oninput = function () {
     var text = input.value;
     console.log(text);
+    var minWidth = context.measureText(text).width,
+        minHeight = 2 * fontSize,
+        canvasModified = false;
+    if (canvas.width < minWidth) {
+      canvas.width = minWidth;
+      canvasModified = true;
+    }
+    if (canvas.height < minHeight) {
+      canvas.height = minHeight;
+      canvasModified = true;
+    }
+    if (canvasModified) {
+      context.font = fontString;
+    }
+    var width = canvas.width,
+        height = canvas.height,
+        xFill = 0,
+        yFill = height / 2;
+    context.clearRect(0, 0, width, height);
+    context.fillText(text, xFill, yFill);
   };
 };

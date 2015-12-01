@@ -20,6 +20,7 @@ h1 {
   position: fixed;
   left: 300px;
   bottom: 250px;
+  border: 2px solid #eee;
 }
 
 #textInput {
