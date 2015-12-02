@@ -19,7 +19,7 @@ h1 {
 #canvasContainer {
   position: fixed;
   left: 300px;
-  bottom: 250px;
+  bottom: 300px;
   border: 2px solid #eee;
 }
 
@@ -29,5 +29,7 @@ h1 {
   bottom: 200px;
   font-family: 'Roboto Condensed', sans-serif;
   font-size: 36px;
+  width: 500px;
+  outline: none;
 }
 
