@@ -23,6 +23,12 @@ h1 {
   border: 2px solid #eee;
 }
 
+#debugCanvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
 #textInput {
   position: fixed;
   left: 300px;

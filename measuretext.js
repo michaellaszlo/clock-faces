@@ -1,92 +1,5 @@
 var MeasureText = {};
 
-/*
-MeasureText.measure = function (text, font, fontSize) {
-  var canvas = Clock.measure.canvas,
-      context = Clock.measure.context;
-  if (context.font != font) {
-    context.font = font;
-  }
-  var nominalWidth = Math.ceil(context.measureText(text).width);
-  if (canvas.width < 2 * nominalWidth) {
-    canvas.width = 2 * nominalWidth;
-    context.font = font;
-  }
-  if (canvas.height < 2 * fontSize) {
-    canvas.height = 2 * fontSize;
-    context.font = font;
-  }
-  context.clearRect(0, 0, canvas.width, canvas.height);
-  var canvasHeight = canvas.height,
-      xFill = 20,
-      yFill = canvasHeight / 2;
-  context.fillText(text, xFill, yFill);
-  var data = context.getImageData(xFill, 0, nominalWidth, canvasHeight).data,
-      xMin, xMax, yMin, yMax;
-  for (var x = xFill; x < xFill + nominalWidth; ++x) {
-    for (var y = 0; y < canvasHeight; ++y) {
-      var i = 4 * (y * nominalWidth + x);
-      if (data[i + 3] == 0) {
-        continue;
-      }
-      if (xMin === undefined) {
-        xMin = xMax = x;
-        yMin = yMax = y;
-      } else {
-        xMin = Math.min(xMin, x);
-        xMax = Math.max(xMax, x);
-        yMin = Math.min(yMin, y);
-        yMax = Math.max(yMax, y);
-      }
-    }
-  }
-  console.log(fontSize + 'px', text, nominalWidth, xMax - xMin + 1, xMin, xMax);
-  context.fillStyle = '#eee';
-  context.fillRect(0, 0, canvas.width, canvas.height);
-  context.fillStyle = '#ccc';
-  context.fillRect(xMin, yMin, xMax - xMin + 1, yMax - yMin + 1);
-  var x0 = xMin + (xMin + xMax) / 2,
-      y0 = yMin + (yMin + yMax) / 2,
-      radiusSquared = 0;
-  for (var x = xMin; x <= xMax; ++x) {
-    for (var y = yMin; y <= yMax; ++y) {
-      var i = 4 * (y * nominalWidth + x);
-      if (data[i + 3] == 0) {
-        continue;
-      }
-      var dx = Math.abs(x - x0) + 1,
-          dy = Math.abs(y - y0) + 1;
-      radiusSquared = Math.max(radiusSquared, dx * dx + dy * dy);
-    }
-  }
-  var radius = Math.ceil(Math.sqrt(radiusSquared));
-  //context.fillRect(0, yMin, width, yMax - yMin + 1);
-  context.fillStyle = '#000';
-  context.fillText(text, xFill, yFill);
-  if (cache[font] === undefined) {
-    cache[font] = {
-      text: {},
-      yMin: yMin,
-      yMax: yMax
-    };
-  } else {
-    cache[font].yMin = Math.min(cache[font].yMin, yMin);
-    cache[font].yMax = Math.max(cache[font].yMax, yMax);
-  }
-  var measurement = cache[font].text[text] = {
-    xMin: xMin, xMax: xMax, yMin: yMin, yMax: yMax,
-    nominalWidth: nominalWidth,
-    measuredWidth: xMax - xMin,
-    radius: radius,
-    center: {  // Relative to fill point.
-      x: x0 - xFill,
-      y: y0 - yFill
-    },
-  };
-  return measurement;
-};
-*/
-
 MeasureText.cache = {};
 
 MeasureText.measure = function (fontSize, fontFamily, text) {
@@ -97,34 +10,81 @@ MeasureText.measure = function (fontSize, fontFamily, text) {
     return cache[font].text[text];
   }
 
-  // Make sure the canvas is large enough for the text.
   var canvas = MeasureText.canvas,
       context = MeasureText.context,
-      putativeWidth = context.measureText(text).width,
-      minWidth = putativeWidth,
+      debugCanvas = MeasureText.debugCanvas,
+      debugContext = MeasureText.debugContext;
+
+  // Ensure that context.measureText will work.
+  if (context.font != font) {
+    context.font = font;
+  }
+
+  // Make sure the canvas is large enough for the text.
+  var ostensibleWidth = Math.ceil(context.measureText(text).width),
+      minWidth = ostensibleWidth,
       minHeight = 2 * fontSize,
       canvasModified = false;
+  console.log('ostensibleWidth:', ostensibleWidth);
   if (canvas.width < minWidth) {
-    canvas.width = minWidth;
+    canvas.width = debugCanvas.width = minWidth;
     canvasModified = true;
   }
   if (canvas.height < minHeight) {
-    canvas.height = minHeight;
+    canvas.height = debugCanvas.height = minHeight;
     canvasModified = true;
   }
-  if (canvasModified) {  // Defend against canvas font reverting to default.
+  // When the font reverts to default, set it anew.
+  if (canvasModified) {
     context.font = font;
   }
 
   // Render the specified text.
-  var width = canvas.width,
-      height = canvas.height,
-      xFill = 0,
-      yFill = height / 2;
-  context.clearRect(0, 0, width, height);
+  var xFill = 0,
+      yFill = minHeight / 2;
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  debugContext.clearRect(0, 0, canvas.width, canvas.height);
   context.fillText(text, xFill, yFill);
 
-  // Measure.
+  // Define the measurement bounds.
+  var xBegin = 0,
+      xLimit = minWidth,
+      xSpan = xLimit - xBegin,
+      yBegin = 0,
+      yLimit = minHeight,
+      ySpan = yLimit - yBegin;
+  if (xSpan * ySpan == 0) {
+    return;
+  }
+  console.log(xBegin, yBegin, xSpan, ySpan);
+
+  // Look for non-zero pixels.
+  var data = context.getImageData(xBegin, yBegin, xSpan, ySpan).data,
+      xMin, yMin, xMin, xMax;
+  for (var dy = 0; dy < ySpan; ++dy) {
+    // Alpha value of the pixel preceding the first pixel in this row.
+    var pos = 4 * (dy * ySpan - 1) + 3;
+    for (var dx = 0; dx < xSpan; ++dx) {
+      pos += 4;
+      if (data[pos] == 0) {
+        continue;
+      }
+      if (xMin === undefined) {
+        xMin = xMax = dx;
+        yMin = yMax = dy;
+      } else {
+        xMin = Math.min(xMin, dx);
+        yMax = dy;  // dy increases monotonically
+      }
+    }
+  }
+  // Convert data coordinates to canvas coordinates.
+  xMin += xBegin;
+  xMax += xBegin;
+  yMin += yBegin;
+  yMax += yBegin;
+
+  console.log('xMin:', xMin, ', yMin:', yMin, ', xMax:', xMax, ', yMax:', yMax);
 
   // Make the return value and store it in the cache.
   var measurement = {};
@@ -137,18 +97,24 @@ MeasureText.measure = function (fontSize, fontFamily, text) {
   return measurement;
 };
 
-MeasureText.setCanvas = function (canvas) {
+MeasureText.setCanvas = function (canvas, debugCanvas) {
   MeasureText.canvas = canvas;
   MeasureText.context = canvas.getContext('2d');
   canvas.width = canvas.height = 0;
+  MeasureText.debugCanvas = debugCanvas;
+  MeasureText.debugContext = debugCanvas.getContext('2d');
+  debugCanvas.width = debugCanvas.height = 0;
 };
 
 MeasureText.loadTest = function () {
   var input = document.getElementById('textInput'),
       container = document.getElementById('canvasContainer'),
+      debugCanvas = document.createElement('canvas');
       canvas = document.createElement('canvas');
+  container.appendChild(debugCanvas);
   container.appendChild(canvas);
-  MeasureText.setCanvas(canvas);
+  debugCanvas.id = 'debugCanvas';
+  MeasureText.setCanvas(canvas, debugCanvas);
 
   var fontSize = 24,
       fontFamily = "'Roboto Condensed', sans-serif";
