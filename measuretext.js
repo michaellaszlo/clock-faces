@@ -56,16 +56,17 @@ MeasureText.measure = function (fontSize, fontFamily, text) {
   if (xSpan * ySpan == 0) {
     return;
   }
-  console.log(xBegin, yBegin, xSpan, ySpan);
+  console.log('xBegin:', xBegin, ', yBegin:', yBegin,
+              ', xSpan:', xSpan, ', ySpan:', ySpan);
   debugContext.fillStyle = '#ddd';
   debugContext.fillRect(xBegin, yBegin, xSpan, ySpan);
 
   // Look for non-zero pixels.
   var data = context.getImageData(xBegin, yBegin, xSpan, ySpan).data,
-      xMin, yMin, xMin, xMax;
+      xMin, yMin, xMax, yMax;
   for (var dy = 0; dy < ySpan; ++dy) {
     // Alpha value of the pixel preceding the first pixel in this row.
-    var pos = 4 * (dy * ySpan - 1) + 3;
+    var pos = 4 * (dy * xSpan - 1) + 3;
     for (var dx = 0; dx < xSpan; ++dx) {
       pos += 4;
       if (data[pos] == 0) {
@@ -76,6 +77,7 @@ MeasureText.measure = function (fontSize, fontFamily, text) {
         yMin = yMax = dy;
       } else {
         xMin = Math.min(xMin, dx);
+        xMax = Math.max(xMax, dx);
         yMax = dy;  // dy increases monotonically
       }
     }
@@ -87,6 +89,8 @@ MeasureText.measure = function (fontSize, fontFamily, text) {
   yMax += yBegin;
 
   console.log('xMin:', xMin, ', yMin:', yMin, ', xMax:', xMax, ', yMax:', yMax);
+  debugContext.fillStyle = '#888';
+  debugContext.fillRect(xMin, yMin, xMax - xMin + 1, yMax - yMin + 1);
 
   // Make the return value and store it in the cache.
   var measurement = {};

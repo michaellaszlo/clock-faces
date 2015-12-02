@@ -51,12 +51,12 @@ Clock.measure.text = function (text, font, fontSize) {
   }
   context.clearRect(0, 0, canvas.width, canvas.height);
   var canvasHeight = canvas.height,
-      xFill = 20,
+      xFill = 0,
       yFill = canvasHeight / 2;
   context.fillText(text, xFill, yFill);
-  var data = context.getImageData(xFill, 0, nominalWidth, canvasHeight).data,
+  var data = context.getImageData(0, 0, nominalWidth, canvasHeight).data,
       xMin, xMax, yMin, yMax;
-  for (var x = xFill; x < xFill + nominalWidth; ++x) {
+  for (var x = 0; x < xFill + nominalWidth; ++x) {
     for (var y = 0; y < canvasHeight; ++y) {
       var i = 4 * (y * nominalWidth + x);
       if (data[i + 3] == 0) {
@@ -73,7 +73,8 @@ Clock.measure.text = function (text, font, fontSize) {
       }
     }
   }
-  console.log(fontSize + 'px', text, nominalWidth, xMax - xMin + 1, xMin, xMax);
+  console.log(fontSize + 'px', text,
+      nominalWidth, xMax - xMin + 1, xMin, xMax, yMin, yMax);
   context.fillStyle = '#eee';
   context.fillRect(0, 0, canvas.width, canvas.height);
   context.fillStyle = '#ccc';
