@@ -57,6 +57,8 @@ MeasureText.measure = function (fontSize, fontFamily, text) {
     return;
   }
   console.log(xBegin, yBegin, xSpan, ySpan);
+  debugContext.fillStyle = '#ddd';
+  debugContext.fillRect(xBegin, yBegin, xSpan, ySpan);
 
   // Look for non-zero pixels.
   var data = context.getImageData(xBegin, yBegin, xSpan, ySpan).data,
@@ -113,6 +115,7 @@ MeasureText.loadTest = function () {
       canvas = document.createElement('canvas');
   container.appendChild(debugCanvas);
   container.appendChild(canvas);
+  canvas.id = 'measureCanvas';
   debugCanvas.id = 'debugCanvas';
   MeasureText.setCanvas(canvas, debugCanvas);
 

@@ -20,13 +20,21 @@ h1 {
   position: fixed;
   left: 300px;
   bottom: 300px;
-  border: 2px solid #eee;
+  border: 1px solid green;
+}
+
+#canvasContainer canvas {
+  display: block;
 }
 
 #debugCanvas {
   position: absolute;
   left: 0;
   top: 0;
+}
+
+#measureCanvas {
+  position: relative;
 }
 
 #textInput {
