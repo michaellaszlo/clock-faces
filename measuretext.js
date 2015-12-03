@@ -21,8 +21,8 @@ MeasureText.measure = function (fontSize, fontFamily, text) {
   }
 
   // Make sure the canvas is large enough for the text.
-  var ostensibleWidth = Math.ceil(context.measureText(text).width),
-      minWidth = ostensibleWidth,
+  var formalWidth = Math.ceil(context.measureText(text).width),
+      minWidth = formalWidth,
       minHeight = 2 * fontSize,
       canvasModified = false;
   if (canvas.width < minWidth) {
@@ -86,21 +86,34 @@ MeasureText.measure = function (fontSize, fontFamily, text) {
 
   // Work out rectangle dimensions and center relative to fill point.
   var measurement = {
-    width: xMax - xMin + 1,
-    height: yMax - yMin + 1,
-    centerFromFill: {
+    formal: {
+      width: formalWidth
+    },
+    pixel: {
+      width: xMax - xMin + 1,
+      height: yMax - yMin + 1,
+      centerFromFill: {
+        x: (xMin + xMax) / 2 - xFill,
+        y: (yMin + yMax) / 2 - yFill
+      }
     }
   };
 
   debugContext.fillStyle = '#ba5956';
-  debugContext.fillRect(xFill, yFill - measurement.height,
-      ostensibleWidth, measurement.height);
+  debugContext.fillRect(xFill, yFill - measurement.pixel.height,
+      formalWidth, measurement.pixel.height);
   debugContext.fillStyle = '#a7ba82';
   debugContext.fillRect(xMin, yMin, xMax - xMin + 1, yMax - yMin + 1);
-  console.log('xFill:', xFill, ', yFill:', yFill,
-              ', ostensibleWidth:', ostensibleWidth,
-              ', measurement.width:', measurement.width,
-              ', measurement.height:', measurement.height);
+  debugContext.beginPath();
+  var x0 = xFill + measurement.pixel.centerFromFill.x,
+      y0 = yFill + measurement.pixel.centerFromFill.y;
+  debugContext.strokeStyle = '#3f66ba';
+  debugContext.moveTo(x0, y0 - measurement.pixel.height / 2);
+  debugContext.lineTo(x0, y0 + measurement.pixel.height / 2);
+  debugContext.moveTo(x0 - measurement.pixel.width / 2, y0);
+  debugContext.lineTo(x0 + measurement.pixel.width / 2, y0);
+  debugContext.stroke();
+  console.log(JSON.stringify(measurement));
 
   // Make the return value and store it in the cache.
   if (cache[font] === undefined) {
