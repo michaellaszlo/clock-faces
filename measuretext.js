@@ -25,7 +25,6 @@ MeasureText.measure = function (fontSize, fontFamily, text) {
       minWidth = ostensibleWidth,
       minHeight = 2 * fontSize,
       canvasModified = false;
-  console.log('ostensibleWidth:', ostensibleWidth);
   if (canvas.width < minWidth) {
     canvas.width = debugCanvas.width = minWidth;
     canvasModified = true;
@@ -56,10 +55,7 @@ MeasureText.measure = function (fontSize, fontFamily, text) {
   if (xSpan * ySpan == 0) {
     return;
   }
-  console.log('xBegin:', xBegin, ', yBegin:', yBegin,
-              ', xSpan:', xSpan, ', ySpan:', ySpan);
   debugContext.fillStyle = '#ddd';
-  debugContext.fillRect(xBegin, yBegin, xSpan, ySpan);
 
   // Look for non-zero pixels.
   var data = context.getImageData(xBegin, yBegin, xSpan, ySpan).data,
@@ -88,12 +84,25 @@ MeasureText.measure = function (fontSize, fontFamily, text) {
   yMin += yBegin;
   yMax += yBegin;
 
-  console.log('xMin:', xMin, ', yMin:', yMin, ', xMax:', xMax, ', yMax:', yMax);
-  debugContext.fillStyle = '#888';
+  // Work out rectangle dimensions and center relative to fill point.
+  var measurement = {
+    width: xMax - xMin + 1,
+    height: yMax - yMin + 1,
+    centerFromFill: {
+    }
+  };
+
+  debugContext.fillStyle = '#ba5956';
+  debugContext.fillRect(xFill, yFill - measurement.height,
+      ostensibleWidth, measurement.height);
+  debugContext.fillStyle = '#a7ba82';
   debugContext.fillRect(xMin, yMin, xMax - xMin + 1, yMax - yMin + 1);
+  console.log('xFill:', xFill, ', yFill:', yFill,
+              ', ostensibleWidth:', ostensibleWidth,
+              ', measurement.width:', measurement.width,
+              ', measurement.height:', measurement.height);
 
   // Make the return value and store it in the cache.
-  var measurement = {};
   if (cache[font] === undefined) {
     cache[font] = {
       text: {}
@@ -123,7 +132,7 @@ MeasureText.loadTest = function () {
   debugCanvas.id = 'debugCanvas';
   MeasureText.setCanvas(canvas, debugCanvas);
 
-  var fontSize = 24,
+  var fontSize = 48,
       fontFamily = "'Roboto Condensed', sans-serif";
 
   input.oninput = function () {

@@ -20,7 +20,7 @@ h1 {
   position: fixed;
   left: 300px;
   bottom: 300px;
-  border: 1px solid green;
+  border: 1px solid #ccc;
 }
 
 #canvasContainer canvas {
@@ -42,7 +42,7 @@ h1 {
   left: 300px;
   bottom: 200px;
   font-family: 'Roboto Condensed', sans-serif;
-  font-size: 36px;
+  font-size: 48px;
   width: 500px;
   outline: none;
 }
