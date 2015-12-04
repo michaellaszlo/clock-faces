@@ -3,7 +3,7 @@ var MeasureText = {};
 MeasureText.cache = {};
 
 MeasureText.measure = function (fontSize, fontFamily, text) {
-  // Check for a prior measurement of the same text in the same font.
+  // Check for a prior result of the same text in the same font.
   var cache = MeasureText.cache,
       font = fontSize + 'px ' + fontFamily;
   if (cache[font] !== undefined && cache[font].text[text] !== undefined) {
@@ -45,7 +45,7 @@ MeasureText.measure = function (fontSize, fontFamily, text) {
   debugContext.clearRect(0, 0, canvas.width, canvas.height);
   context.fillText(text, xFill, yFill);
 
-  // Define the measurement bounds.
+  // Define the result bounds.
   var xBegin = 0,
       xLimit = minWidth,
       xSpan = xLimit - xBegin,
@@ -85,7 +85,7 @@ MeasureText.measure = function (fontSize, fontFamily, text) {
   yMax += yBegin;
 
   // Work out rectangle dimensions and center relative to fill point.
-  var measurement = {
+  var result = {
     formal: {
       width: formalWidth
     },
@@ -100,20 +100,19 @@ MeasureText.measure = function (fontSize, fontFamily, text) {
   };
 
   debugContext.fillStyle = '#ba5956';
-  debugContext.fillRect(xFill, yFill - measurement.pixel.height,
-      formalWidth, measurement.pixel.height);
+  debugContext.fillRect(xFill, yMin, formalWidth, result.pixel.height);
   debugContext.fillStyle = '#a7ba82';
-  debugContext.fillRect(xMin, yMin, xMax - xMin + 1, yMax - yMin + 1);
+  debugContext.fillRect(xMin, yMin, result.pixel.width, result.pixel.height);
   debugContext.beginPath();
-  var x0 = xFill + measurement.pixel.centerFromFill.x,
-      y0 = yFill + measurement.pixel.centerFromFill.y;
+  var x0 = xFill + result.pixel.centerFromFill.x,
+      y0 = yFill + result.pixel.centerFromFill.y;
   debugContext.strokeStyle = '#3f66ba';
-  debugContext.moveTo(x0, y0 - measurement.pixel.height / 2);
-  debugContext.lineTo(x0, y0 + measurement.pixel.height / 2);
-  debugContext.moveTo(x0 - measurement.pixel.width / 2, y0);
-  debugContext.lineTo(x0 + measurement.pixel.width / 2, y0);
+  debugContext.moveTo(x0, y0 - result.pixel.height / 2);
+  debugContext.lineTo(x0, y0 + result.pixel.height / 2);
+  debugContext.moveTo(x0 - result.pixel.width / 2, y0);
+  debugContext.lineTo(x0 + result.pixel.width / 2, y0);
   debugContext.stroke();
-  console.log(JSON.stringify(measurement));
+  console.log(JSON.stringify(result));
 
   // Make the return value and store it in the cache.
   if (cache[font] === undefined) {
@@ -121,8 +120,8 @@ MeasureText.measure = function (fontSize, fontFamily, text) {
       text: {}
     };
   }
-  cache[font].text[text] = measurement;
-  return measurement;
+  cache[font].text[text] = result;
+  return result;
 };
 
 MeasureText.setCanvas = function (canvas, debugCanvas) {
