@@ -26,100 +26,6 @@ Clock.padLeft = function (x, padCharacter, length) {
   return parts.join('');
 };
 
-Clock.measure = {};
-
-Clock.measure.cache = {};
-
-Clock.measure.text = function (text, font, fontSize) {
-  var cache = Clock.measure.cache;
-  if (cache[font] !== undefined && cache[font].text[text] !== undefined) {
-    return cache[font].text[text];
-  }
-  var canvas = Clock.measure.canvas,
-      context = Clock.measure.context;
-  if (context.font != font) {
-    context.font = font;
-  }
-  var nominalWidth = Math.ceil(context.measureText(text).width);
-  if (canvas.width < 2 * nominalWidth) {
-    canvas.width = 2 * nominalWidth;
-    context.font = font;
-  }
-  if (canvas.height < 2 * fontSize) {
-    canvas.height = 2 * fontSize;
-    context.font = font;
-  }
-  context.clearRect(0, 0, canvas.width, canvas.height);
-  var canvasHeight = canvas.height,
-      xFill = 0,
-      yFill = canvasHeight / 2;
-  context.fillText(text, xFill, yFill);
-  var data = context.getImageData(0, 0, nominalWidth, canvasHeight).data,
-      xMin, xMax, yMin, yMax;
-  for (var x = 0; x < xFill + nominalWidth; ++x) {
-    for (var y = 0; y < canvasHeight; ++y) {
-      var i = 4 * (y * nominalWidth + x);
-      if (data[i + 3] == 0) {
-        continue;
-      }
-      if (xMin === undefined) {
-        xMin = xMax = x;
-        yMin = yMax = y;
-      } else {
-        xMin = Math.min(xMin, x);
-        xMax = Math.max(xMax, x);
-        yMin = Math.min(yMin, y);
-        yMax = Math.max(yMax, y);
-      }
-    }
-  }
-  console.log(fontSize + 'px', text,
-      nominalWidth, xMax - xMin + 1, xMin, xMax, yMin, yMax);
-  context.fillStyle = '#eee';
-  context.fillRect(0, 0, canvas.width, canvas.height);
-  context.fillStyle = '#ccc';
-  context.fillRect(xMin, yMin, xMax - xMin + 1, yMax - yMin + 1);
-  var x0 = xMin + (xMin + xMax) / 2,
-      y0 = yMin + (yMin + yMax) / 2,
-      radiusSquared = 0;
-  for (var x = xMin; x <= xMax; ++x) {
-    for (var y = yMin; y <= yMax; ++y) {
-      var i = 4 * (y * nominalWidth + x);
-      if (data[i + 3] == 0) {
-        continue;
-      }
-      var dx = Math.abs(x - x0) + 1,
-          dy = Math.abs(y - y0) + 1;
-      radiusSquared = Math.max(radiusSquared, dx * dx + dy * dy);
-    }
-  }
-  var radius = Math.ceil(Math.sqrt(radiusSquared));
-  //context.fillRect(0, yMin, width, yMax - yMin + 1);
-  context.fillStyle = '#000';
-  context.fillText(text, xFill, yFill);
-  if (cache[font] === undefined) {
-    cache[font] = {
-      text: {},
-      yMin: yMin,
-      yMax: yMax
-    };
-  } else {
-    cache[font].yMin = Math.min(cache[font].yMin, yMin);
-    cache[font].yMax = Math.max(cache[font].yMax, yMax);
-  }
-  var measurement = cache[font].text[text] = {
-    xMin: xMin, xMax: xMax, yMin: yMin, yMax: yMax,
-    nominalWidth: nominalWidth,
-    measuredWidth: xMax - xMin,
-    radius: radius,
-    center: {  // Relative to fill point.
-      x: x0 - xFill,
-      y: y0 - yFill
-    },
-  };
-  return measurement;
-};
-
 // Mundane clock.
 Clock.mundaneClock = {};
 
@@ -133,20 +39,20 @@ Clock.mundaneClock.update = function (hour, minute, second, millisecond) {
       tickDistance = radius - tickRadius,
       hourRadius = 0.21 * radius,
       hourDistance = tickDistance - tickRadius - hourRadius,
-      fontSize = 1.33 * hourRadius,
-      font = fontSize + 'px ' + Clock.font;
+      fontSize = 1.33 * hourRadius;
 
   for (var i = 0; i < 60; ++i) {
     var angle = -Math.PI / 2 + i * Math.PI / 30;
     if (i % 5 == 0) {
       var x = center.x + Math.cos(angle) * hourDistance,
           y = center.y + Math.sin(angle) * hourDistance,
-          text = '' + (i == 0 ? 12 : i / 5);
+          text = '' + (i == 0 ? 12 : i / 5),
+          font = fontSize + 'px ' + Clock.font;
       context.font = font;
-      var m = Clock.measure.text(text, font, fontSize);
+      var m = MeasureText.measure(fontSize, Clock.font, text);
       context.fillStyle = '#444';
-      //context.fillText(text, x - m.nominalWidth / 2, y - m.center.y);
-      context.fillText(text, x - m.center.x, y - m.center.y);
+      //context.fillText(text, x - m.nominalWidth / 2, y - m.pixel.centerFromFill.y);
+      context.fillText(text, x - m.pixel.centerFromFill.x, y - m.pixel.centerFromFill.y);
 
       context.lineWidth = 4;
       context.strokeStyle = '#222';
@@ -222,7 +128,7 @@ Clock.bubbleClock.update = function (hour, minute, second, millisecond) {
         fontSize = 1.33 * radius,
         font = fontSize + 'px ' + Clock.font;
     context.font = font;
-    var m = Clock.measure.text(text, font, fontSize);
+    var m = MeasureText.measure(fontSize, Clock.font, text);
     if (discColor) {
       context.fillStyle = discColor;
       context.beginPath();
@@ -230,7 +136,7 @@ Clock.bubbleClock.update = function (hour, minute, second, millisecond) {
       context.fill();
     }
     context.fillStyle = color;
-    context.fillText(text, x - m.center.x, y - m.center.y);
+    context.fillText(text, x - m.pixel.centerFromFill.x, y - m.pixel.centerFromFill.y);
   };
   for (var h = 0; h < 12; ++h) {
     if (h == hour) {
@@ -285,11 +191,11 @@ Clock.sectorClockBasic.update = function (hour, minute, second, millisecond) {
         fontSize = Math.round(1.2 * handRadius),
         font = fontSize + 'px ' + Clock.font;
     context.font = font;
-    var m = Clock.measure.text(valueText, font, fontSize);
+    var m = MeasureText.measure(fontSize, Clock.font, valueText);
     context.fillStyle = '#222';
     context.fillText(valueText,
-        x - m.center.x,
-        y - m.center.y);
+        x - m.pixel.centerFromFill.x,
+        y - m.pixel.centerFromFill.y);
   };
   paintArc(hour, Clock.textMaker.hour(hour), 12,
       hourDistance, hourRadius, '#f4f4f4', '#444');
@@ -375,7 +281,7 @@ Clock.sectorClockImproved.paintArc = function (value, fraction, valueText,
   }
   var font = fontSize + 'px ' + Clock.font;
   context.font = font;
-  var m = Clock.measure.text(valueText, font, fontSize);
+  var m = MeasureText.measure(fontSize, Clock.font, valueText);
   context.fillStyle = '#222';
   if (options.rotateText) {
     context.save();
@@ -385,12 +291,12 @@ Clock.sectorClockImproved.paintArc = function (value, fraction, valueText,
     } else {
       context.rotate(angle + 3 * Math.PI / 2);
     }
-    context.translate(-m.center.x, -m.center.y);
+    context.translate(-m.pixel.centerFromFill.x, -m.pixel.centerFromFill.y);
     context.fillText(valueText, 0, 0);
     context.restore();
   }
   else {
-    context.fillText(valueText, x - m.center.x, y - m.center.y);
+    context.fillText(valueText, x - m.pixel.centerFromFill.x, y - m.pixel.centerFromFill.y);
   }
 };
 
@@ -483,10 +389,8 @@ Clock.update = function () {
 };
 
 Clock.load = function () {
-  Clock.measure.canvas = document.createElement('canvas');
-  Clock.measure.context = Clock.measure.canvas.getContext('2d');
-  Clock.measure.canvas.width = Clock.measure.canvas.height = 5;
-  document.getElementById('wrapper').appendChild(Clock.measure.canvas);
+  MeasureText.setCanvas(document.createElement('canvas'),
+      document.createElement('canvas'));
 
   var diameter = Clock.diameter = Clock.initial.diameter;
   Clock.radius = diameter / 2;
