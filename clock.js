@@ -52,7 +52,7 @@ Clock.mundaneClock.update = function (hour, minute, second, millisecond) {
       var m = MeasureText.measure(fontSize, Clock.font, text);
       context.fillStyle = '#444';
       //context.fillText(text, x - m.nominalWidth / 2, y - m.pixel.centerFromFill.y);
-      context.fillText(text, x - m.pixel.centerFromFill.x, y - m.pixel.centerFromFill.y);
+      context.fillText(text, x - m.formal.width / 2, y - m.pixel.centerFromFill.y);
 
       context.lineWidth = 4;
       context.strokeStyle = '#222';
@@ -136,7 +136,7 @@ Clock.bubbleClock.update = function (hour, minute, second, millisecond) {
       context.fill();
     }
     context.fillStyle = color;
-    context.fillText(text, x - m.pixel.centerFromFill.x, y - m.pixel.centerFromFill.y);
+    context.fillText(text, x - m.formal.width / 2, y - m.pixel.centerFromFill.y);
   };
   for (var h = 0; h < 12; ++h) {
     if (h == hour) {
@@ -194,7 +194,7 @@ Clock.sectorClockBasic.update = function (hour, minute, second, millisecond) {
     var m = MeasureText.measure(fontSize, Clock.font, valueText);
     context.fillStyle = '#222';
     context.fillText(valueText,
-        x - m.pixel.centerFromFill.x,
+        x - m.formal.width / 2,
         y - m.pixel.centerFromFill.y);
   };
   paintArc(hour, Clock.textMaker.hour(hour), 12,
@@ -296,7 +296,7 @@ Clock.sectorClockImproved.paintArc = function (value, fraction, valueText,
     context.restore();
   }
   else {
-    context.fillText(valueText, x - m.pixel.centerFromFill.x, y - m.pixel.centerFromFill.y);
+    context.fillText(valueText, x - m.formal.width / 2, y - m.pixel.centerFromFill.y);
   }
 };
 
