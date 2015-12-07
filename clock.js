@@ -28,7 +28,6 @@ Clock.padLeft = function (x, padCharacter, length) {
 
 // Mundane clock.
 Clock.mundaneClock = {};
-
 Clock.mundaneClock.update = function (hour, minute, second, millisecond) {
   var context = Clock.mundaneClock.context,
       radius = Clock.radius,
@@ -39,7 +38,7 @@ Clock.mundaneClock.update = function (hour, minute, second, millisecond) {
       tickDistance = radius - tickRadius,
       hourRadius = 0.21 * radius,
       hourDistance = tickDistance - tickRadius - hourRadius,
-      fontSize = 1.33 * hourRadius;
+      fontSize = Math.round(1.33 * hourRadius);
 
   for (var i = 0; i < 60; ++i) {
     var angle = -Math.PI / 2 + i * Math.PI / 30;
@@ -52,7 +51,7 @@ Clock.mundaneClock.update = function (hour, minute, second, millisecond) {
       var m = MeasureText.measure(fontSize, Clock.font, text);
       context.fillStyle = '#444';
       context.fillText(text,
-          x - m.pixel.centerFromFill.x, y - m.pixel.centerFromFill.y);
+          x - m.formal.width / 2, y - m.pixel.centerFromFill.y);
 
       context.lineWidth = 4;
       context.strokeStyle = '#222';
@@ -100,7 +99,6 @@ Clock.mundaneClock.update = function (hour, minute, second, millisecond) {
 
 // Bubble clock.
 Clock.bubbleClock = {};
-
 Clock.bubbleClock.update = function (hour, minute, second, millisecond) {
   var context = Clock.bubbleClock.context,
       radius = Clock.radius,
@@ -125,7 +123,7 @@ Clock.bubbleClock.update = function (hour, minute, second, millisecond) {
         text = textMaker(value),
         x = center.x + Math.cos(angle) * distance,
         y = center.y + Math.sin(angle) * distance,
-        fontSize = 1.33 * radius,
+        fontSize = Math.round(1.33 * radius),
         font = fontSize + 'px ' + Clock.font;
     context.font = font;
     var m = MeasureText.measure(fontSize, Clock.font, text);
@@ -137,7 +135,7 @@ Clock.bubbleClock.update = function (hour, minute, second, millisecond) {
     }
     context.fillStyle = color;
     context.fillText(text,
-        x - m.pixel.centerFromFill.x, y - m.pixel.centerFromFill.y);
+        x - m.formal.width / 2, y - m.pixel.centerFromFill.y);
   }
   for (var h = 0; h < 12; ++h) {
     if (h == hour) {
@@ -155,7 +153,6 @@ Clock.bubbleClock.update = function (hour, minute, second, millisecond) {
 
 // Sector clock.
 Clock.sectorClockBasic = {};
-
 Clock.sectorClockBasic.update = function (hour, minute, second, millisecond) {
   var context = Clock.sectorClockBasic.context,
       radius = Clock.radius,
@@ -195,7 +192,7 @@ Clock.sectorClockBasic.update = function (hour, minute, second, millisecond) {
     var m = MeasureText.measure(fontSize, Clock.font, valueText);
     context.fillStyle = '#222';
     context.fillText(valueText,
-        x - m.pixel.centerFromFill.x, y - m.pixel.centerFromFill.y);
+        x - m.formal.width / 2, y - m.pixel.centerFromFill.y);
   };
   paintArc(hour, Clock.textMaker.hour(hour), 12,
       hourDistance, hourRadius, '#f4f4f4', '#444');
@@ -207,7 +204,6 @@ Clock.sectorClockBasic.update = function (hour, minute, second, millisecond) {
 
 // Sector clock with centered seconds, tick marks, animated sectors.
 Clock.sectorClockImproved = {};
-
 Clock.sectorClockImproved.paintArc = function (value, fraction, valueText,
         hertz, handDistance, handRadius, thickness, context, color, options) {
   options = options || {};
@@ -291,13 +287,13 @@ Clock.sectorClockImproved.paintArc = function (value, fraction, valueText,
     } else {
       context.rotate(angle + 3 * Math.PI / 2);
     }
-    context.translate(-m.pixel.centerFromFill.x, -m.pixel.centerFromFill.y);
+    context.translate(-m.formal.width / 2, -m.pixel.centerFromFill.y);
     context.fillText(valueText, 0, 0);
     context.restore();
   }
   else {
     context.fillText(valueText,
-        x - m.pixel.centerFromFill.x, y - m.pixel.centerFromFill.y);
+        x - m.formal.width / 2, y - m.pixel.centerFromFill.y);
   }
 };
 
@@ -335,7 +331,6 @@ Clock.sectorClockImproved.update = function (hour, minute, second,
 
 // Sector clock with centered seconds, tick marks, animated sectors.
 Clock.sectorClockImprovedInverted = {};
-
 Clock.sectorClockImprovedInverted.update = function (hour, minute, second,
     millisecond) {
   var context = Clock.sectorClockImprovedInverted.context,
@@ -377,8 +372,7 @@ Clock.update = function () {
       second = date.getSeconds(),
       millisecond = date.getMilliseconds();
   minute = second;
-  hour = second % 12 + 1;
-  hour = 12;
+  hour = second % 12;
 
   Clock.clocks.forEach(function (clock) {
     clock.update(hour, minute, second, millisecond);

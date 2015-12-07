@@ -22,8 +22,8 @@ MeasureText.measure = function (fontSize, fontFamily, text) {
 
   // Make sure the canvas is large enough for the text.
   var formalWidth = Math.ceil(context.measureText(text).width),
-      minWidth = formalWidth,
-      minHeight = 2 * fontSize,
+      minWidth = Math.ceil(formalWidth),
+      minHeight = Math.ceil(2 * fontSize),
       canvasModified = false;
   if (canvas.width < minWidth) {
     canvas.width = debugCanvas.width = minWidth;
@@ -112,7 +112,6 @@ MeasureText.measure = function (fontSize, fontFamily, text) {
   debugContext.moveTo(x0 - result.pixel.width / 2, y0);
   debugContext.lineTo(x0 + result.pixel.width / 2, y0);
   debugContext.stroke();
-  console.log(JSON.stringify(result));
 
   // Make the return value and store it in the cache.
   if (cache[font] === undefined) {
