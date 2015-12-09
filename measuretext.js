@@ -1,13 +1,17 @@
 var MeasureText = {};
 
+MeasureText.makeFontName = function (fontSize, fontFamily) {
+  return fontSize + 'px ' + fontFamily;
+};
+
 MeasureText.cache = {};
 
 MeasureText.measure = function (fontSize, fontFamily, text) {
   // Check for a prior result of the same text in the same font.
   var cache = MeasureText.cache,
-      font = fontSize + 'px ' + fontFamily;
-  if (cache[font] !== undefined && cache[font].text[text] !== undefined) {
-    return cache[font].text[text];
+      font = MeasureText.makeFontName(fontSize, fontFamily);
+  if (font in cache && text in cache[font].one) {
+    return cache[font].one[text];
   }
 
   var canvas = MeasureText.canvas,
@@ -113,14 +117,60 @@ MeasureText.measure = function (fontSize, fontFamily, text) {
   debugContext.lineTo(x0 + result.pixel.width / 2, y0);
   debugContext.stroke();
 
-  // Make the return value and store it in the cache.
-  if (cache[font] === undefined) {
+  // Cache the measurement for this text. Update overall measurement.
+  if (font in cache) {
+    var all = cache[font].all,
+        formal = all.formal,
+        pixel = all.pixel;
+    formal.maxWidth = Math.max(formal.maxWidth, result.formal.width);
+    pixel.maxWidth = Math.max(pixel.maxWidth, result.pixel.width);
+    pixel.maxHeight = Math.max(pixel.maxHeight, result.pixel.height);
+    var xModified = false,
+        yModified = false;
+    if (xMin < pixel.xMin) {
+      pixel.xMin = xMin;
+      xModified = true;
+    }
+    if (xMax > pixel.xMax) {
+      pixel.xMax = xMax;
+      xModified = true;
+    }
+    if (xModified) {
+    }
+  } else {
     cache[font] = {
-      text: {}
+      one: {},
+      all: {}
+    };
+    var all = cache[font].all;
+    all.formal = {
+      maxWidth: result.formal.width
+    };
+    all.pixel = {
+      maxWidth: result.pixel.width,
+      maxHeight: result.pixel.height,
+      xMin: xMin,
+      xMax: xMax,
+      yMin: yMin,
+      yMax: yMax,
+      centerFromFill: {
+        x: result.pixel.centerFromFill.x,
+        y: result.pixel.centerFromFill.y
+      }
     };
   }
-  cache[font].text[text] = result;
+  cache[font].one[text] = result;
+
   return result;
+};
+
+MeasureText.measureAll = function (fontSize, fontFamily) {
+  var cache = MeasureText.cache,
+      font = MeasureText.makeFontName(fontSize, fontFamily);
+  if (font in cache) {
+    return cache[font].all;
+  }
+  return null;
 };
 
 MeasureText.setCanvas = function (canvas, debugCanvas) {
