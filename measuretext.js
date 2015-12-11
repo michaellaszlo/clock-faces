@@ -117,7 +117,7 @@ MeasureText.measure = function (fontSize, fontFamily, text) {
   debugContext.lineTo(x0 + result.pixel.width / 2, y0);
   debugContext.stroke();
 
-  // Cache the measurement for this text. Update overall measurement.
+  // Cache the measurements for this text. Update overall measurements.
   if (font in cache) {
     var all = cache[font].all,
         formal = all.formal,
@@ -125,8 +125,7 @@ MeasureText.measure = function (fontSize, fontFamily, text) {
     formal.maxWidth = Math.max(formal.maxWidth, result.formal.width);
     pixel.maxWidth = Math.max(pixel.maxWidth, result.pixel.width);
     pixel.maxHeight = Math.max(pixel.maxHeight, result.pixel.height);
-    var xModified = false,
-        yModified = false;
+    var xModified = false;
     if (xMin < pixel.xMin) {
       pixel.xMin = xMin;
       xModified = true;
@@ -136,6 +135,19 @@ MeasureText.measure = function (fontSize, fontFamily, text) {
       xModified = true;
     }
     if (xModified) {
+      pixel.centerFromFill.x = (pixel.xMin + pixel.xMax) / 2 - xFill;
+    }
+    var yModified = false;
+    if (yMin < pixel.yMin) {
+      pixel.yMin = yMin;
+      xModified = true;
+    }
+    if (yMax > pixel.yMax) {
+      pixel.yMax = yMax;
+      yModified = true;
+    }
+    if (yModified) {
+      pixel.centerFromFill.y = (pixel.yMin + pixel.yMax) / 2 - yFill;
     }
   } else {
     cache[font] = {
@@ -160,6 +172,7 @@ MeasureText.measure = function (fontSize, fontFamily, text) {
     };
   }
   cache[font].one[text] = result;
+  console.log(JSON.stringify(all));
 
   return result;
 };
