@@ -140,7 +140,7 @@ MeasureText.measure = function (fontSize, fontFamily, text) {
     var yModified = false;
     if (yMin < pixel.yMin) {
       pixel.yMin = yMin;
-      xModified = true;
+      yModified = true;
     }
     if (yMax > pixel.yMax) {
       pixel.yMax = yMax;
@@ -172,7 +172,6 @@ MeasureText.measure = function (fontSize, fontFamily, text) {
     };
   }
   cache[font].one[text] = result;
-  console.log(JSON.stringify(all));
 
   return result;
 };
