@@ -27,9 +27,17 @@ Clock.padLeft = function (x, padCharacter, length) {
 };
 
 // Mundane clock.
-Clock.mundaneClock = {};
+Clock.mundaneClock = {
+  color: {
+    digit: '#444',
+    tick: { hour: '#222', minute: '#666' },
+    hand: { hour: '#222', minute: '#222', second: '#222' }
+  }
+};
 Clock.mundaneClock.update = function (hour, minute, second, millisecond) {
-  var context = Clock.mundaneClock.context,
+  var thisClock = Clock.mundaneClock,
+      color = thisClock.color,
+      context = thisClock.context,
       radius = Clock.radius,
       center = { x: radius, y: radius };
   context.clearRect(0, 0, 2 * radius, 2 * radius);
@@ -52,14 +60,14 @@ Clock.mundaneClock.update = function (hour, minute, second, millisecond) {
           all = MeasureText.measureAll(fontSize, Clock.font),
           xdFill = -m.formal.width / 2,
           ydFill = -all.pixel.centerFromFill.y;
-      context.fillStyle = '#444';
+      context.fillStyle = color.digit;
       context.fillText(text, x + xdFill, y + ydFill);
 
       context.lineWidth = 4;
-      context.strokeStyle = '#222';
+      context.strokeStyle = color.tick.hour;
     } else {
       context.lineWidth = 1;
-      context.strokeStyle = '#666';
+      context.strokeStyle = color.tick.minute;
     }
     var a = {
           x: center.x + Math.cos(angle) * (tickDistance - tickRadius),
@@ -84,19 +92,22 @@ Clock.mundaneClock.update = function (hour, minute, second, millisecond) {
       minuteHandThickness = 0.020 * radius,
       secondHandLength = 0.85 * radius,
       secondHandThickness = 0.005 * radius;
-  context.strokeStyle = '#222';
-  function paintHand(angle, length, thickness) {
+  function paintHand(angle, length, thickness, strokeColor) {
     context.beginPath();
     context.lineWidth = thickness;
+    context.strokeStyle = strokeColor;
     context.moveTo(center.x + Math.cos(angle + Math.PI) * 0.06 * length,
                    center.y + Math.sin(angle + Math.PI) * 0.06 * length);
     context.lineTo(center.x + Math.cos(angle) * length,
                    center.y + Math.sin(angle) * length);
     context.stroke();
   }
-  paintHand(hourAngle, hourHandLength, hourHandThickness);
-  paintHand(minuteAngle, minuteHandLength, minuteHandThickness);
-  paintHand(secondAngle, secondHandLength, secondHandThickness);
+  paintHand(hourAngle, hourHandLength, hourHandThickness,
+      color.hand.hour);
+  paintHand(minuteAngle, minuteHandLength, minuteHandThickness,
+      color.hand.minute);
+  paintHand(secondAngle, secondHandLength, secondHandThickness,
+      color.hand.second);
 };
 
 // Bubble clock.
@@ -379,8 +390,6 @@ Clock.update = function () {
       minute = date.getMinutes(),
       second = date.getSeconds(),
       millisecond = date.getMilliseconds();
-  minute = second;
-  hour = second % 12;
 
   Clock.clocks.forEach(function (clock) {
     clock.update(hour, minute, second, millisecond);
