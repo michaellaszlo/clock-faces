@@ -1,6 +1,6 @@
 Clock = {
   initial: {
-    diameter: 300
+    diameter: 250
   },
   font: "'Roboto Condensed', sans-serif",
   textMaker: {
@@ -126,14 +126,29 @@ Clock.mundaneClock.update = function (hour, minute, second, millisecond) {
 };
 
 // Bubble clock.
-Clock.bubbleClock = {};
+Clock.bubbleClock = {
+  palette: {
+    grayscale: {
+      center: '#aaa',
+      digit: { active: '#fff', passive: '#444' },
+      bubble: { hour: '#444', minute: '#666', second: '#888' }
+    },
+    color: {
+      center: '#a8b390',
+      digit: { active: '#fff', passive: '#306b3f' },
+      bubble: { hour: '#447d4e', minute: '#6790bd', second: '#b3ad7c' }
+    }
+  }
+};
 Clock.bubbleClock.update = function (hour, minute, second, millisecond) {
-  var context = Clock.bubbleClock.context,
+  var thisClock = Clock.bubbleClock,
+      palette = thisClock.palette.color,
+      context = Clock.bubbleClock.context,
       radius = Clock.radius,
       center = { x: radius, y: radius };
   context.clearRect(0, 0, 2 * radius, 2 * radius);
   context.beginPath();
-  context.fillStyle = '#aaa';
+  context.fillStyle = palette.center;
   context.arc(center.x, center.y, 0.015 * radius, 0, 2 * Math.PI);
   context.fill();
 
@@ -170,15 +185,19 @@ Clock.bubbleClock.update = function (hour, minute, second, millisecond) {
   for (var h = 0; h < 12; ++h) {
     if (h == hour) {
       paint(h, Clock.textMaker.hour, 12,
-          hourDistance, hourRadius, '#fff', '#444');
+          hourDistance, hourRadius, palette.digit.active,
+          palette.bubble.hour);
     } else {
-      paint(h, Clock.textMaker.hour, 12, hourDistance, hourRadius, '#444');
+      paint(h, Clock.textMaker.hour, 12, hourDistance, hourRadius,
+          palette.digit.passive);
     }
   }
   paint(minute, Clock.textMaker.minute, 60,
-      minuteDistance, minuteRadius, '#fff', '#666');
+      minuteDistance, minuteRadius, palette.digit.active,
+      palette.bubble.minute);
   paint(second, Clock.textMaker.second, 60,
-      secondDistance, secondRadius, '#fff', '#888');
+      secondDistance, secondRadius, palette.digit.active,
+      palette.bubble.second);
 };
 
 // Sector clock.
