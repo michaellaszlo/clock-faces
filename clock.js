@@ -134,9 +134,9 @@ Clock.bubbleClock = {
       bubble: { hour: '#444', minute: '#666', second: '#888' }
     },
     color: {
-      center: '#a8b390',
-      digit: { active: '#fff', passive: '#306b3f' },
-      bubble: { hour: '#447d4e', minute: '#6790bd', second: '#b3ad7c' }
+      center: '#649959',
+      digit: { active: '#fff', passive: '#2b5084' },
+      bubble: { hour: '#2b5084', minute: '#447b8b', second: '#649959' }
     }
   }
 };
