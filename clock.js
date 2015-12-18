@@ -134,9 +134,9 @@ Clock.bubbleClock = {
       bubble: { hour: '#444', minute: '#666', second: '#888' }
     },
     color: {
-      center: '#649959',
+      center: '#ac8281',
       digit: { active: '#fff', passive: '#2b5084' },
-      bubble: { hour: '#2b5084', minute: '#447b8b', second: '#649959' }
+      bubble: { hour: '#293c66', minute: '#7a546d', second: '#9a7373' }
     }
   }
 };
@@ -201,7 +201,10 @@ Clock.bubbleClock.update = function (hour, minute, second, millisecond) {
 };
 
 // Sector clock.
-Clock.sectorClockBasic = {};
+Clock.sectorClockBasic = {
+  palette: {
+  }
+};
 Clock.sectorClockBasic.update = function (hour, minute, second, millisecond) {
   var context = Clock.sectorClockBasic.context,
       radius = Clock.radius,
