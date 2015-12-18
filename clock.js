@@ -207,12 +207,17 @@ Clock.sectorClockBasic = {
       digit: '#222',
       circle: '#f4f4f4',
       arc: '#444'
+    },
+    color: {
+      digit: '#23396d',
+      circle: '#f5f7e7',
+      arc: '#445d96'
     }
   }
 };
 Clock.sectorClockBasic.update = function (hour, minute, second, millisecond) {
   var thisClock = Clock.sectorClockBasic,
-      palette = thisClock.palette.grayscale,
+      palette = thisClock.palette.color,
       context = thisClock.context,
       radius = Clock.radius,
       center = { x: radius, y: radius },
