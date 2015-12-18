@@ -134,9 +134,9 @@ Clock.bubbleClock = {
       bubble: { hour: '#444', minute: '#666', second: '#888' }
     },
     color: {
-      center: '#ac8281',
+      center: '#93a2b3',
       digit: { active: '#fff', passive: '#2b5084' },
-      bubble: { hour: '#293c66', minute: '#7a546d', second: '#9a7373' }
+      bubble: { hour: '#223c60', minute: '#446394', second: '#667aab' }
     }
   }
 };
@@ -203,10 +203,17 @@ Clock.bubbleClock.update = function (hour, minute, second, millisecond) {
 // Sector clock.
 Clock.sectorClockBasic = {
   palette: {
+    grayscale: {
+      digit: '#222',
+      circle: '#f4f4f4',
+      arc: '#444'
+    }
   }
 };
 Clock.sectorClockBasic.update = function (hour, minute, second, millisecond) {
-  var context = Clock.sectorClockBasic.context,
+  var thisClock = Clock.sectorClockBasic,
+      palette = thisClock.palette.grayscale,
+      context = thisClock.context,
       radius = Clock.radius,
       center = { x: radius, y: radius },
       width = 0.05 * radius;
@@ -245,15 +252,15 @@ Clock.sectorClockBasic.update = function (hour, minute, second, millisecond) {
         all = MeasureText.measureAll(fontSize, Clock.font),
         xdFill = -m.formal.width / 2,
         ydFill = -all.pixel.centerFromFill.y;
-    context.fillStyle = '#222';
+    context.fillStyle = palette.digit;
     context.fillText(valueText, x + xdFill, y + ydFill);
   };
   paintArc(hour, Clock.textMaker.hour(hour), 12,
-      hourDistance, hourRadius, '#f4f4f4', '#444');
+      hourDistance, hourRadius, palette.circle, palette.arc);
   paintArc(minute, Clock.textMaker.minute(minute), 60,
-      minuteDistance, minuteRadius, '#f4f4f4', '#444');
+      minuteDistance, minuteRadius, palette.circle, palette.arc);
   paintArc(second, Clock.textMaker.second(second), 60,
-      secondDistance, secondRadius, '#f4f4f4', '#444');
+      secondDistance, secondRadius, palette.circle, palette.arc);
 };
 
 // Sector clock with centered seconds, tick marks, animated sectors.
