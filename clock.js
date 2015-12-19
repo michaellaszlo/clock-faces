@@ -35,9 +35,9 @@ Clock.mundaneClock = {
       hand: { hour: '#222', minute: '#222', second: '#222' }
     },
     color: {
-      digit: '#264356',
-      tick: { hour: '#264356', minute: '#43617d' },
-      hand: { hour: '#1e365e', minute: '#1e365e', second: '#bd1212' }
+      digit: '#2b5084',
+      tick: { hour: '#2b5084', minute: '#446394' },
+      hand: { hour: '#2b5084', minute: '#446394', second: '#bd1212' }
     }
   }
 };
@@ -93,36 +93,41 @@ Clock.mundaneClock.update = function (hour, minute, second, millisecond) {
   var hourAngle = -Math.PI / 2 + Math.PI * (hour / 6 + minute / 360),
       minuteAngle = -Math.PI / 2 + (minute / 30 + second / 1800) * Math.PI,
       secondAngle = -Math.PI / 2 + (second / 30) * Math.PI,
-      hourHandLength = 0.26 * radius,
-      hourHandWidth = 0.050 * radius,
-      minuteHandLength = 0.55 * radius,
+      quarter = Math.PI / 2,
+      hourHandLength = 0.325 * radius,
+      hourHandWidth = 0.060 * radius,
+      minuteHandLength = 0.550 * radius,
       minuteHandWidth = 0.035 * radius,
       secondHandLength = 0.85 * radius,
       secondHandWidth = 1;
-  function paintHand(angle, length, width, color) {
+  function paintHand(angle, length, width, headLength, flange, color) {
     context.beginPath();
     context.fillStyle = color;
-    var x = center.x + Math.cos(angle - Math.PI / 2) * 0.5 * width,
-        y = center.y + Math.sin(angle - Math.PI / 2) * 0.5 * width;
-    context.moveTo(x -= Math.cos(angle) * 0.05 * length,
-                   y -= Math.sin(angle) * 0.05 * length);
-    context.lineTo(x += Math.cos(angle) * 0.85 * length,
-                   y += Math.sin(angle) * 0.85 * length);
+    var x = center.x + Math.cos(angle - quarter) * 0.5 * width,
+        y = center.y + Math.sin(angle - quarter) * 0.5 * width;
+    context.moveTo(x, y);
+    context.lineTo(x += Math.cos(angle) * (length - headLength),
+                   y += Math.sin(angle) * (length - headLength));
+    context.lineTo(x += Math.cos(angle - quarter) * flange,
+                   y += Math.sin(angle - quarter) * flange);
     context.lineTo(center.x + Math.cos(angle) * length,
                    center.y + Math.sin(angle) * length);
-    context.lineTo(x += Math.cos(angle + Math.PI / 2) * width,
-                   y += Math.sin(angle + Math.PI / 2) * width);
-    context.lineTo(x -= Math.cos(angle) * 0.85 * length,
-                   y -= Math.sin(angle) * 0.85 * length);
-    context.closePath();
+    context.lineTo(x += Math.cos(angle + quarter) * (width + 2 * flange),
+                   y += Math.sin(angle + quarter) * (width + 2 * flange));
+    context.lineTo(x += Math.cos(angle - quarter) * flange,
+                   y += Math.sin(angle - quarter) * flange);
+    context.lineTo(x -= Math.cos(angle) * (length - headLength),
+                   y -= Math.sin(angle) * (length - headLength));
+    context.arc(center.x, center.y, 0.5 * width,
+        angle + quarter, angle - quarter);
     context.fill();
   }
   paintHand(hourAngle, hourHandLength, hourHandWidth,
-      palette.hand.hour);
+      0.06 * radius, 0, palette.hand.hour);
   paintHand(minuteAngle, minuteHandLength, minuteHandWidth,
-      palette.hand.minute);
+      0.05 * radius, 0, palette.hand.minute);
   paintHand(secondAngle, secondHandLength, secondHandWidth,
-      palette.hand.second);
+      0.04 * radius, 0.020 * radius, palette.hand.second);
 };
 
 // Bubble clock.
@@ -134,9 +139,9 @@ Clock.bubbleClock = {
       bubble: { hour: '#444', minute: '#666', second: '#888' }
     },
     color: {
-      center: '#93a2b3',
+      center: '#bd8b92',
       digit: { active: '#fff', passive: '#2b5084' },
-      bubble: { hour: '#223c60', minute: '#446394', second: '#667aab' }
+      bubble: { hour: '#223c60', minute: '#446394', second: '#b66b6b' }
     }
   }
 };
@@ -204,14 +209,14 @@ Clock.bubbleClock.update = function (hour, minute, second, millisecond) {
 Clock.sectorClockBasic = {
   palette: {
     grayscale: {
-      digit: '#222',
       circle: '#f4f4f4',
-      arc: '#444'
+      arc: { hour: '#444', minute: '#444', second: '#444' },
+      digit: { hour: '#222', minute: '#222', second: '#222' }
     },
     color: {
-      digit: '#23396d',
       circle: '#f5f7e7',
-      arc: '#445d96'
+      arc: { hour: '#445d96', minute: '#445d96', second: '#ca312f' },
+      digit: { hour: '#23396d', minute: '#23396d', second: '#b73333' }
     }
   }
 };
@@ -233,7 +238,7 @@ Clock.sectorClockBasic.update = function (hour, minute, second, millisecond) {
       secondDistance = minuteDistance - minuteRadius - secondRadius;
 
   function paintArc(value, valueText, hertz, handDistance, handRadius,
-        circleColor, arcColor) {
+        circleColor, arcColor, digitColor) {
     var angle = -Math.PI / 2 + value * 2 * Math.PI / hertz;
     // Background circle.
     context.beginPath();
@@ -257,19 +262,35 @@ Clock.sectorClockBasic.update = function (hour, minute, second, millisecond) {
         all = MeasureText.measureAll(fontSize, Clock.font),
         xdFill = -m.formal.width / 2,
         ydFill = -all.pixel.centerFromFill.y;
-    context.fillStyle = palette.digit;
+    context.fillStyle = digitColor;
     context.fillText(valueText, x + xdFill, y + ydFill);
   };
-  paintArc(hour, Clock.textMaker.hour(hour), 12,
-      hourDistance, hourRadius, palette.circle, palette.arc);
-  paintArc(minute, Clock.textMaker.minute(minute), 60,
-      minuteDistance, minuteRadius, palette.circle, palette.arc);
-  paintArc(second, Clock.textMaker.second(second), 60,
-      secondDistance, secondRadius, palette.circle, palette.arc);
+  paintArc(hour,
+      Clock.textMaker.hour(hour), 12, hourDistance, hourRadius,
+      palette.circle, palette.arc.hour, palette.digit.hour);
+  paintArc(minute,
+      Clock.textMaker.minute(minute), 60, minuteDistance, minuteRadius,
+      palette.circle, palette.arc.minute, palette.digit.minute);
+  paintArc(second,
+      Clock.textMaker.second(second), 60, secondDistance, secondRadius,
+      palette.circle, palette.arc.second, palette.digit.second);
 };
 
 // Sector clock with centered seconds, tick marks, animated sectors.
-Clock.sectorClockImproved = {};
+Clock.sectorClockImproved = {
+  palette: {
+    grayscale: {
+      digit: '#222',
+      circle: '#f4f4f4',
+      arc: '#444'
+    },
+    color: {
+      digit: '#23396d',
+      circle: '#f5f7e7',
+      arc: '#445d96'
+    }
+  }
+};
 Clock.sectorClockImproved.paintArc = function (value, fraction, valueText,
         hertz, handDistance, handRadius, width, context, color, options) {
   options = options || {};
