@@ -280,7 +280,7 @@ Clock.sectorClockBasic.update = function (hour, minute, second, millisecond) {
 Clock.sectorClockImproved = {
   palette: {
     grayscale: {
-      digit: '#222',
+      digit: { hour: '#222', minute: '#222', second: '#222' },
       circle: '#f4f4f4',
       tick: '#666',
       second: { circle: '#eee', tick: '#eee' },
@@ -288,7 +288,7 @@ Clock.sectorClockImproved = {
       arc: { done: '#222', remaining: '#888' }
     },
     color: {
-      digit: '#23396d',
+      digit: { hour: '#23396d', minute: '#23396d', second: '#23396d' },
       circle: '#f5f7e7',
       tick: '#3b66b0',
       second: { circle: '#ecefde', tick: '#ecefde' },
@@ -297,7 +297,8 @@ Clock.sectorClockImproved = {
     }
   }
 };
-Clock.sectorClockImproved.paintArc = function (value, fraction, valueText,
+Clock.sectorClockImproved.paintArc = function (unitName,
+        value, fraction, valueText,
         hertz, handDistance, handRadius, width, context, options) {
   options = options || {};
   var palette = Clock.sectorClockImproved.palette.color,
@@ -377,7 +378,7 @@ Clock.sectorClockImproved.paintArc = function (value, fraction, valueText,
       all = MeasureText.measureAll(fontSize, Clock.font),
       xdFill = -m.formal.width / 2,
       ydFill = -all.pixel.centerFromFill.y;
-  context.fillStyle = palette.digit;
+  context.fillStyle = palette.digit[unitName];
   if (options.rotateText) {
     context.save();
     context.translate(x, y);
@@ -413,14 +414,14 @@ Clock.sectorClockImproved.update = function (hour, minute, second,
   context.clearRect(0, 0, 2 * radius, 2 * radius);
   context.lineWidth = width;
   var paintArc = Clock.sectorClockImproved.paintArc;
-  paintArc(hour, hourFraction,
+  paintArc('hour', hour, hourFraction,
       Clock.textMaker.hour(hour), 12,
       hourDistance, hourRadius, width, context);
-  paintArc(minute, minuteFraction,
+  paintArc('minute', minute, minuteFraction,
       Clock.textMaker.minute(minute), 60,
       minuteDistance, minuteRadius, width, context);
   //palette.tick = palette.circle = '#eee';
-  paintArc(second, secondFraction,
+  paintArc('second', second, secondFraction,
       Clock.textMaker.second(second), 60,
       secondDistance, secondRadius, width, context,
       { centerOfCircle: true, sweep: false, second: true });
@@ -446,15 +447,15 @@ Clock.sectorClockImprovedInverted.update = function (hour, minute, second,
   context.clearRect(0, 0, 2 * radius, 2 * radius);
   context.lineWidth = width;
   var paintArc = Clock.sectorClockImproved.paintArc;
-  paintArc(second, secondFraction,
+  paintArc('second', second, secondFraction,
       Clock.textMaker.second(second), 60,
       secondDistance, secondRadius, width, context,
       { zebra: true, textCenteredInArc: false, rotateText: false });
-  paintArc(minute, minuteFraction,
+  paintArc('minute', minute, minuteFraction,
       Clock.textMaker.minute(minute), 60,
       minuteDistance, minuteRadius, width, context,
       { zebra: true, rotateText: false });
-  paintArc(hour, hourFraction,
+  paintArc('hour', hour, hourFraction,
       Clock.textMaker.hour(hour), 12,
       hourDistance, hourRadius, width, context,
       { zebra: true, centerOfCircle: true });
