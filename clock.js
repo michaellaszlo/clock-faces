@@ -288,13 +288,18 @@ Clock.sectorClockImproved = {
       arc: { done: '#222', remaining: '#888' }
     },
     color: {
-      digit: { hour: '#23396d', minute: '#23396d', second: '#23396d' },
+      digit: { hour: '#23396d', minute: '#23396d', second: '#b73333' },
       circle: '#f5f7e7',
       tick: '#3b66b0',
       second: { circle: '#ecefde', tick: '#ecefde' },
       stripe: '#e8e9da',
       arc: { done: '#0d4266', remaining: '#8ba6bf' }
     }
+    /*
+      circle: '#f5f7e7',
+      arc: { hour: '#445d96', minute: '#445d96', second: '#ca312f' },
+      digit: { hour: '#23396d', minute: '#23396d', second: '#b73333' }
+    */
   }
 };
 Clock.sectorClockImproved.paintArc = function (unitName,
