@@ -346,19 +346,18 @@ Clock.sectorClockImproved.paintArc = function (unitName,
   context.lineWidth = width;
   if (options.sweep) {
     context.beginPath();
-    context.strokeStyle = (options.second ? palette : palette.second).arc.done;
+    context.strokeStyle = palette.arc.done;
     var a = angle + fraction * 2 * Math.PI / hertz;
     context.arc(center.x, center.y, distance, a, a + 2 * Math.PI / hertz);
     context.stroke();
   } else {
     context.beginPath();
-    context.strokeStyle =
-        (options.second ? palette : palette.second).arc.remaining;
+    context.strokeStyle = palette.arc.remaining;
     context.arc(center.x, center.y, distance,
         angle, angle + 2 * Math.PI / hertz);
     context.stroke();
     context.beginPath();
-    context.strokeStyle = (options.second ? palette : palette.second).arc.done;
+    context.strokeStyle = palette.arc.done;
     context.arc(center.x, center.y, distance,
         angle, angle + fraction * 2 * Math.PI / hertz);
     context.stroke();
