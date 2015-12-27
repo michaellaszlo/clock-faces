@@ -283,16 +283,16 @@ Clock.sectorClockImproved = {
       digit:     { hour: '#222222', minute: '#222222', second: '#222222' },
       circle:    { hour: '#f4f4f4', minute: '#f4f4f4', second: '#f4f4f4' },
       tick:      { hour: '#666666', minute: '#666666', second: '#eeeeee' },
-      stripe:    { hour: '#e8e8e8', minute: '#e8e8e8', second: '#e8e8e8' },
-      remaining: { hour: '#888888', minute: '#888888', second: '#222222' },
-      done:      { hour: '#222222', minute: '#222222', second: '#222222' }
+      stripe:    { hour: '#ebebeb', minute: '#ebebeb', second: '#ebebeb' },
+      remaining: { hour: '#888888', minute: '#888888', second: '#999999' },
+      done:      { hour: '#222222', minute: '#222222', second: '#000000' }
     },
     color: {
       digit:     { hour: '#23396d', minute: '#23396d', second: '#b73333' },
-      circle:    { hour: '#f5f7e7', minute: '#f5f7e7', second: '#ecefde' },
-      tick:      { hour: '#3b66b0', minute: '#3b66b0', second: '#ecefde' },
+      tick:      { hour: '#3b66b0', minute: '#3b66b0', second: '#f5f7e7' },
+      circle:    { hour: '#f5f7e7', minute: '#f5f7e7', second: '#f5f7e7' },
       stripe:    { hour: '#e8e9da', minute: '#e8e9da', second: '#e8e9da' },
-      remaining: { hour: '#8ba6bf', minute: '#8ba6bf', second: '#8ba6bf' },
+      remaining: { hour: '#8ba6bf', minute: '#8ba6bf', second: '#d5bfc3' },
       done:      { hour: '#0d4266', minute: '#0d4266', second: '#b73333' }
     }
   },
