@@ -55,6 +55,45 @@ Clock.mundaneClock.update = function (hour, minute, second, millisecond) {
       hourDistance = tickDistance - tickRadius - hourRadius,
       fontSize = Math.round(1.33 * hourRadius);
 
+  var hourAngle = -Math.PI / 2 + Math.PI * (hour / 6 + minute / 360),
+      minuteAngle = -Math.PI / 2 + (minute / 30 + second / 1800) * Math.PI,
+      secondAngle = -Math.PI / 2 + (second / 30) * Math.PI,
+      quarter = Math.PI / 2,
+      hourHandLength = 0.325 * radius,
+      hourHandWidth = 0.060 * radius,
+      minuteHandLength = 0.550 * radius,
+      minuteHandWidth = 0.035 * radius,
+      secondHandLength = 0.85 * radius,
+      secondHandWidth = 1;
+  function paintHand(angle, length, width, headLength, flange, color) {
+    context.beginPath();
+    context.fillStyle = color;
+    var x = center.x + Math.cos(angle - quarter) * 0.5 * width,
+        y = center.y + Math.sin(angle - quarter) * 0.5 * width;
+    context.moveTo(x, y);
+    context.lineTo(x += Math.cos(angle) * (length - headLength),
+                   y += Math.sin(angle) * (length - headLength));
+    context.lineTo(x += Math.cos(angle - quarter) * flange,
+                   y += Math.sin(angle - quarter) * flange);
+    context.lineTo(center.x + Math.cos(angle) * length,
+                   center.y + Math.sin(angle) * length);
+    context.lineTo(x += Math.cos(angle + quarter) * (width + 2 * flange),
+                   y += Math.sin(angle + quarter) * (width + 2 * flange));
+    context.lineTo(x += Math.cos(angle - quarter) * flange,
+                   y += Math.sin(angle - quarter) * flange);
+    context.lineTo(x -= Math.cos(angle) * (length - headLength),
+                   y -= Math.sin(angle) * (length - headLength));
+    context.arc(center.x, center.y, 0.5 * width,
+        angle + quarter, angle - quarter);
+    context.fill();
+  }
+  paintHand(secondAngle, secondHandLength, secondHandWidth,
+      0, 0, palette.hand.second);
+  paintHand(minuteAngle, minuteHandLength, minuteHandWidth,
+      0.05 * radius, 0, palette.hand.minute);
+  paintHand(hourAngle, hourHandLength, hourHandWidth,
+      0.06 * radius, 0, palette.hand.hour);
+
   for (var i = 0; i < 60; ++i) {
     var angle = -Math.PI / 2 + i * Math.PI / 30;
     if (i % 5 == 0) {
@@ -89,45 +128,6 @@ Clock.mundaneClock.update = function (hour, minute, second, millisecond) {
     context.lineTo(b.x, b.y);
     context.stroke();
   }
-
-  var hourAngle = -Math.PI / 2 + Math.PI * (hour / 6 + minute / 360),
-      minuteAngle = -Math.PI / 2 + (minute / 30 + second / 1800) * Math.PI,
-      secondAngle = -Math.PI / 2 + (second / 30) * Math.PI,
-      quarter = Math.PI / 2,
-      hourHandLength = 0.325 * radius,
-      hourHandWidth = 0.060 * radius,
-      minuteHandLength = 0.550 * radius,
-      minuteHandWidth = 0.035 * radius,
-      secondHandLength = 0.85 * radius,
-      secondHandWidth = 1;
-  function paintHand(angle, length, width, headLength, flange, color) {
-    context.beginPath();
-    context.fillStyle = color;
-    var x = center.x + Math.cos(angle - quarter) * 0.5 * width,
-        y = center.y + Math.sin(angle - quarter) * 0.5 * width;
-    context.moveTo(x, y);
-    context.lineTo(x += Math.cos(angle) * (length - headLength),
-                   y += Math.sin(angle) * (length - headLength));
-    context.lineTo(x += Math.cos(angle - quarter) * flange,
-                   y += Math.sin(angle - quarter) * flange);
-    context.lineTo(center.x + Math.cos(angle) * length,
-                   center.y + Math.sin(angle) * length);
-    context.lineTo(x += Math.cos(angle + quarter) * (width + 2 * flange),
-                   y += Math.sin(angle + quarter) * (width + 2 * flange));
-    context.lineTo(x += Math.cos(angle - quarter) * flange,
-                   y += Math.sin(angle - quarter) * flange);
-    context.lineTo(x -= Math.cos(angle) * (length - headLength),
-                   y -= Math.sin(angle) * (length - headLength));
-    context.arc(center.x, center.y, 0.5 * width,
-        angle + quarter, angle - quarter);
-    context.fill();
-  }
-  paintHand(secondAngle, secondHandLength, secondHandWidth,
-      0.04 * radius, 0.020 * radius, palette.hand.second);
-  paintHand(minuteAngle, minuteHandLength, minuteHandWidth,
-      0.05 * radius, 0, palette.hand.minute);
-  paintHand(hourAngle, hourHandLength, hourHandWidth,
-      0.06 * radius, 0, palette.hand.hour);
 };
 
 // Bubble clock.
