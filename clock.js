@@ -280,32 +280,49 @@ Clock.sectorClockBasic.update = function (hour, minute, second, millisecond) {
 Clock.sectorClockImproved = {
   palette: {
     grayscale: {
-      digit: { hour: '#222', minute: '#222', second: '#222' },
-      circle: '#f4f4f4',
-      tick: '#666',
-      second: { circle: '#eee', tick: '#eee' },
-      stripe: '#e8e8e8',
-      arc: { done: '#222', remaining: '#888' }
+      digit:     { hour: '#222222', minute: '#222222', second: '#222222' },
+      circle:    { hour: '#f4f4f4', minute: '#f4f4f4', second: '#f4f4f4' },
+      tick:      { hour: '#666666', minute: '#666666', second: '#eeeeee' },
+      stripe:    { hour: '#e8e8e8', minute: '#e8e8e8', second: '#e8e8e8' },
+      remaining: { hour: '#888888', minute: '#888888', second: '#222222' },
+      done:      { hour: '#222222', minute: '#222222', second: '#222222' }
     },
     color: {
-      digit: { hour: '#23396d', minute: '#23396d', second: '#b73333' },
-      circle: '#f5f7e7',
-      tick: '#3b66b0',
-      second: { circle: '#ecefde', tick: '#ecefde',
-        arc: { done: '#b73333', remaining: '#8ba6bf' }
-      },
-      stripe: '#e8e9da',
-      arc: { done: '#0d4266', remaining: '#8ba6bf' }
+      digit:     { hour: '#23396d', minute: '#23396d', second: '#b73333' },
+      circle:    { hour: '#f5f7e7', minute: '#f5f7e7', second: '#ecefde' },
+      tick:      { hour: '#3b66b0', minute: '#3b66b0', second: '#ecefde' },
+      stripe:    { hour: '#e8e9da', minute: '#e8e9da', second: '#e8e9da' },
+      remaining: { hour: '#8ba6bf', minute: '#8ba6bf', second: '#8ba6bf' },
+      done:      { hour: '#0d4266', minute: '#0d4266', second: '#b73333' }
+    }
+  },
+  invertPalette: function () {
+    var paletteName, palette,
+        groupNames, groupName, group,
+        units = [ 'hour', 'minute', 'second' ];
+    for (paletteName in this.palette) {
+      palette = this.palette[paletteName];
+      groupNames = Object.keys(palette);
+      units.forEach(function (unit) {
+        palette[unit] = {};
+      });
+      groupNames.forEach(function (groupName) {
+        group = palette[groupName];
+        units.forEach(function (unit) {
+          palette[unit][groupName] = group[unit];
+        });
+      });
     }
   }
 };
-Clock.sectorClockImproved.paintArc = function (unitName,
-        value, fraction, valueText,
-        hertz, handDistance, handRadius, width, context, options) {
+Clock.sectorClockImproved.paintArc = function (unit, value,
+        fraction, valueText, hertz,
+        handDistance, handRadius, width, context, options) {
   options = options || {};
   var palette = Clock.sectorClockImproved.palette.color,
-      circleColor = (options.second ? palette.second.circle : palette.circle),
-      tickColor = (options.second ? palette.second.tick : palette.tick),
+      circleColor = palette.circle[unit];
+      tickColor = palette.tick[unit];
+      stripeColor = palette.stripe[unit];
       radius = Clock.radius,
       center = { x: radius, y: radius },
       angle = -Math.PI / 2 + value * 2 * Math.PI / hertz,
@@ -315,7 +332,7 @@ Clock.sectorClockImproved.paintArc = function (unitName,
     for (var i = 0; i < hertz; ++i) {
       var a = -Math.PI / 2 + i * 2 * Math.PI / hertz;
       context.beginPath();
-      context.strokeStyle = (i % 2 == 0 ? circleColor : palette.stripe);
+      context.strokeStyle = (i % 2 == 0 ? circleColor : stripeColor);
       context.arc(center.x, center.y, distance, a, a + 4 * Math.PI / hertz);
       context.stroke();
     }
@@ -346,18 +363,18 @@ Clock.sectorClockImproved.paintArc = function (unitName,
   context.lineWidth = width;
   if (options.sweep) {
     context.beginPath();
-    context.strokeStyle = palette.arc.done;
+    context.strokeStyle = palette.done[unit];
     var a = angle + fraction * 2 * Math.PI / hertz;
     context.arc(center.x, center.y, distance, a, a + 2 * Math.PI / hertz);
     context.stroke();
   } else {
     context.beginPath();
-    context.strokeStyle = palette.arc.remaining;
+    context.strokeStyle = palette.remaining[unit];
     context.arc(center.x, center.y, distance,
         angle, angle + 2 * Math.PI / hertz);
     context.stroke();
     context.beginPath();
-    context.strokeStyle = palette.arc.done;
+    context.strokeStyle = palette.done[unit];
     context.arc(center.x, center.y, distance,
         angle, angle + fraction * 2 * Math.PI / hertz);
     context.stroke();
@@ -380,7 +397,7 @@ Clock.sectorClockImproved.paintArc = function (unitName,
       all = MeasureText.measureAll(fontSize, Clock.font),
       xdFill = -m.formal.width / 2,
       ydFill = -all.pixel.centerFromFill.y;
-  context.fillStyle = palette.digit[unitName];
+  context.fillStyle = palette.digit[unit];
   if (options.rotateText) {
     context.save();
     context.translate(x, y);
@@ -401,7 +418,6 @@ Clock.sectorClockImproved.paintArc = function (unitName,
 Clock.sectorClockImproved.update = function (hour, minute, second,
     millisecond) {
   var context = Clock.sectorClockImproved.context,
-      palette = Clock.sectorClockImproved.palette.grayscale,
       radius = Clock.radius,
       width = 0.05 * radius,
       hourRadius = 0.22 * radius,
@@ -422,7 +438,6 @@ Clock.sectorClockImproved.update = function (hour, minute, second,
   paintArc('minute', minute, minuteFraction,
       Clock.textMaker.minute(minute), 60,
       minuteDistance, minuteRadius, width, context);
-  //palette.tick = palette.circle = '#eee';
   paintArc('second', second, secondFraction,
       Clock.textMaker.second(second), 60,
       secondDistance, secondRadius, width, context,
@@ -434,7 +449,6 @@ Clock.sectorClockImprovedInverted = {};
 Clock.sectorClockImprovedInverted.update = function (hour, minute, second,
     millisecond) {
   var context = Clock.sectorClockImprovedInverted.context,
-      palette = Clock.sectorClockImproved.palette.grayscale,
       radius = Clock.radius,
       width = 0.05 * radius,
       secondRadius = 0.14 * radius,
@@ -502,6 +516,8 @@ Clock.load = function () {
     clock.context = canvas.getContext('2d');
     container.appendChild(canvas);
   });
+
+  Clock.sectorClockImproved.invertPalette();
 
   document.getElementById('stopButton').onmousedown = function () {
     Clock.stopped = true;
