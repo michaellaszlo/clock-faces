@@ -320,9 +320,13 @@ Clock.sectorClockImproved.paintArc = function (unit, value,
         handDistance, handRadius, width, context, options) {
   options = options || {};
   var palette = Clock.sectorClockImproved.palette.color,
-      circleColor = palette.circle[unit];
-      tickColor = palette.tick[unit];
-      stripeColor = palette.stripe[unit];
+      colors = palette[unit],
+      digitColor = colors.digit,
+      circleColor = colors.circle,
+      tickColor = colors.tick,
+      stripeColor = colors.stripe,
+      remainingColor = colors.remaining,
+      doneColor = colors.done,
       radius = Clock.radius,
       center = { x: radius, y: radius },
       angle = -Math.PI / 2 + value * 2 * Math.PI / hertz,
@@ -363,18 +367,18 @@ Clock.sectorClockImproved.paintArc = function (unit, value,
   context.lineWidth = width;
   if (options.sweep) {
     context.beginPath();
-    context.strokeStyle = palette.done[unit];
+    context.strokeStyle = doneColor;
     var a = angle + fraction * 2 * Math.PI / hertz;
     context.arc(center.x, center.y, distance, a, a + 2 * Math.PI / hertz);
     context.stroke();
   } else {
     context.beginPath();
-    context.strokeStyle = palette.remaining[unit];
+    context.strokeStyle = remainingColor;
     context.arc(center.x, center.y, distance,
         angle, angle + 2 * Math.PI / hertz);
     context.stroke();
     context.beginPath();
-    context.strokeStyle = palette.done[unit];
+    context.strokeStyle = doneColor;
     context.arc(center.x, center.y, distance,
         angle, angle + fraction * 2 * Math.PI / hertz);
     context.stroke();
@@ -397,7 +401,7 @@ Clock.sectorClockImproved.paintArc = function (unit, value,
       all = MeasureText.measureAll(fontSize, Clock.font),
       xdFill = -m.formal.width / 2,
       ydFill = -all.pixel.centerFromFill.y;
-  context.fillStyle = palette.digit[unit];
+  context.fillStyle = digitColor;
   if (options.rotateText) {
     context.save();
     context.translate(x, y);
