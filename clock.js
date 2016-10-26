@@ -488,15 +488,22 @@ Clock.update = function () {
       minute = date.getMinutes(),
       second = date.getSeconds(),
       millisecond = date.getMilliseconds();
-
   Clock.clocks.forEach(function (clock) {
     clock.update(hour, minute, second, millisecond);
   });
-
   if (Clock.stopped) {
     return;
   }
-  window.requestAnimationFrame(Clock.update);
+  requestAnimationFrame(Clock.update);
+};
+
+Clock.togglePause = function () {
+  if (Clock.stopped) {
+    Clock.stopped = false;
+    requestAnimationFrame(Clock.update);
+  } else {
+    Clock.stopped = true;
+  }
 };
 
 Clock.load = function () {
@@ -523,8 +530,6 @@ Clock.load = function () {
 
   Clock.sectorClockImproved.invertPalette();
 
-  document.getElementById('stopButton').onmousedown = function () {
-    Clock.stopped = true;
-  };
-  window.requestAnimationFrame(Clock.update);
+  document.getElementById('pauseButton').onclick = Clock.togglePause;
+  requestAnimationFrame(Clock.update);
 };

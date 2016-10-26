@@ -28,7 +28,7 @@ canvas {
   margin: 10px;
 }
 
-#stopButton {
+#pauseButton {
   position: fixed;
   left: 20px;
   bottom: 20px;
@@ -39,7 +39,7 @@ canvas {
   padding: 4px 12px;
   cursor: pointer;
 }
-#stopButton:hover {
+#pauseButton:hover {
   color: #444;
   border-color: #888;
 }
